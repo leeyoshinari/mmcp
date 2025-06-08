@@ -18,6 +18,8 @@
     display: flex;
     flex-direction: column;
     z-index: 99999;
+    background-color: aliceblue;
+    opacity: 0.8;
 }
 
 .float-container .filter {
@@ -29,17 +31,41 @@
     margin: 8px;
 }
 
-.float-container .filter * {
+.float-container .filter div {
     height: 32px;
     width: 33%;
+    font-size: 15px;
 }
 
 .float-container .filter div label {
+    width: 70px;
     align-content: center;
+}
+
+.float-container .filter div input {
+    width: 90%;
+    height: 28px;
 }
 
 .float-container .filter div select {
     width: 20%;
     flex: 1;
     min-width: 0;
+}
+
+.float-container .filter div button {
+    width: 40%;
+    height: 32px;
+}
+
+.float-container .logs {
+    /* background-color: aqua; */
+    flex: 1;
+    min-width: 0;
+    padding: 5px;
+    overflow-y: auto;
+    font-family: monospace;
+    text-align: left;
+    white-space: pre;
+    word-break: break-all;
 }

@@ -14,7 +14,8 @@
     {
       "matches": ["*://www.baidu.com/*"],
       "css": ["content/index.css"],
-      "js": ["content/index.js"]
+      "js": ["content/index.js", "utils/home.js", "utils/xlsx.full.min.js"],
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
