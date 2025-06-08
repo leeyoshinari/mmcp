@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "迈瑞药材集采小工具",
+  "description": "迈瑞药材集采小工具",
+  "version": "1.0",
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_icon": "images/icon.png",
+    "default_title": "迈瑞药材集采小工具"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.baidu.com/*"],
+      "css": ["content/index.css"],
+      "js": ["content/index.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["images/icon.ico", "utils/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "permissions": ["scripting", "activeTab", "notifications", "tabs"]
+}

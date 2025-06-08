@@ -1,0 +1,45 @@
+.float-tips {
+    position: absolute;
+    right: 0;
+    cursor: pointer;
+    margin: 15px;
+}
+
+.float-tips img {
+    width: 32px;
+    height: 32px;
+}
+
+.float-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    z-index: 99999;
+}
+
+.float-container .filter {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 8px;
+}
+
+.float-container .filter * {
+    height: 32px;
+    width: 33%;
+}
+
+.float-container .filter div label {
+    align-content: center;
+}
+
+.float-container .filter div select {
+    width: 20%;
+    flex: 1;
+    min-width: 0;
+}
