@@ -1,5 +1,5 @@
 // 广东省新平台议价
-const host = 'https://igi.hsa.gd.gov.cn';
+const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
 
 async function fetchPost(url, data, headers) {
@@ -85,7 +85,7 @@ async function agreeBargain(res) {
 }
 
 async function startTask(data) {
-  let totle_num = 0;
+  let total_num = 0;
   let success_num = 0;
   try {
     let i = 0;
@@ -95,7 +95,7 @@ async function startTask(data) {
     i += 1;
     for (i; i < data.length; i++) {
       if (!data[i][1]) continue;
-      totle_num += 1;
+      total_num += 1;
       let ms_code = data[i][1];
       let is_agree = data[i][2];
       try {
@@ -140,6 +140,7 @@ async function startTask(data) {
         }
       }
     }
+    exportText(`总数：${total_num}，议价成功：${success_num}，议价失败：${total_num - success_num}`);
   } catch (err) {
     exportText(`失败，请重试: ${err.stack}`);
   }

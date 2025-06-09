@@ -3,6 +3,7 @@
     right: 0;
     cursor: pointer;
     margin: 15px;
+    z-index: 99998;
 }
 
 .float-tips img {

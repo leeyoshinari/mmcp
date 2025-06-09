@@ -1,7 +1,7 @@
 function clickPage() {
   const actionList = [
-      {'label': '广东省新平台议价', 'js': '111111', 'flag': 1, 'province': '广东省'},
-      {'label': '签章', 'js': '111111', 'flag': 1, 'province': '广东省'},
+      {'label': '广东省新平台议价', 'js': '112', 'flag': 1, 'province': '广东省'},
+      {'label': '广东省新平台签章', 'js': '111', 'flag': 1, 'province': '广东省'},
       {'label': '点配送', 'js': '111111', 'flag': 0, 'province': '广东省'},
       {'label': '点配送', 'js': '111111', 'flag': 0, 'province': '广东省'},
   ]

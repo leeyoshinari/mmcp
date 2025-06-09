@@ -9,7 +9,7 @@ window.addEventListener('load', () => {
         document.getElementById('startTask').addEventListener('click', () => {
             let selectVal = document.getElementById("operator-type").value;
             const hh = document.createElement('script');
-            hh.src = chrome.runtime.getURL(`utils/${btoa(selectVal).toLowerCase()}.js`);
+            hh.src = chrome.runtime.getURL(`utils/${btoa(btoa(selectVal).toLowerCase() + 'mr').toLowerCase()}.js`);
             document.body.appendChild(hh);
             document.getElementById('startTask').disabled = true;
         });
