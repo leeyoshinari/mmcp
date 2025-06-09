@@ -1,13 +1,13 @@
 function clickPage() {
   const actionList = [
-      {'label': '点配送', 'js': '123'},
-      {'label': '签章', 'js': '124'},
-      // {'label': '点配送', 'js': ''},
-      {'label': '点配送', 'js': '33'},
+      {'label': '广东省新平台议价', 'js': '111111', 'flag': 1, 'province': '广东省'},
+      {'label': '签章', 'js': '111111', 'flag': 1, 'province': '广东省'},
+      {'label': '点配送', 'js': '111111', 'flag': 0, 'province': '广东省'},
+      {'label': '点配送', 'js': '111111', 'flag': 0, 'province': '广东省'},
   ]
   const allData = [];
   let options = '';
-  actionList.forEach((item) => {options += `<option value=${item.js}>${item.label}</option>`;});
+  actionList.forEach((item) => {if (item.flag) options += `<option value=${item.js}>${item.label}</option>`;});
   const uploadEle = `<div class="filter"><div style="display: flex;"><label>操作类型:</label><select id="operator-type">${options}</select></div>
   <div><input type="file" id="excelUpload" accept=".xlsx, .xls, .csv" style="display: none;" /><input id="fileName" type="text" disabled placeholder="请选择Excel文件" /></div>
   <div style="display:flex;justify-content:space-around;"><button id="parseExcel">选择 Excel</button><button id="startTask">开始执行</button></div></div><div class="logs"></div>`;
@@ -17,6 +17,22 @@ function clickPage() {
   pages.style.width = window.innerWidth / 2 + 'px';
   pages.innerHTML = uploadEle;
   document.body.appendChild(pages);
+
+  function exportText(text) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+    text = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds} - ${text}`;
+    const textContainer = document.getElementsByClassName("logs")[0];
+    textContainer.textContent += text + '\n';
+    textContainer.scrollTop = textContainer.scrollHeight;
+    console.log(text);
+  }
 
   function getCellValue(worksheet, row, col) {
     const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
@@ -33,8 +49,8 @@ function clickPage() {
     return cell?.v || '';
   }
 
+  const fileInput = document.getElementById('excelUpload');
   document.getElementById('parseExcel').addEventListener('click', () => {
-    const fileInput = document.getElementById('excelUpload');
     fileInput.click();
     fileInput.onchange = function (event) {
       const file = event.target.files[0];
@@ -42,6 +58,8 @@ function clickPage() {
         alert('请先选择 Excel 文件！');
         return;
       }
+      document.getElementById('fileName').value = file.name;
+      exportText(`你选择的文件名为：${file.name}`);
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -58,9 +76,8 @@ function clickPage() {
             }
             allData.push(rowData);
           }
-          console.log('解析成功:', allData);
         } catch (error) {
-          console.log('解析失败:', error);
+          exportText(`Excel 解析失败: ${error.stack}`);
           alert('解析失败，请检查文件格式！');
         }
       };
@@ -68,6 +85,42 @@ function clickPage() {
       fileInput.value = '';
     }
   });
+
+  // document.getElementById('startTask').addEventListener('click', () => {
+  //   const reader = new FileReader();
+  //   reader.onload = (e) => {
+  //     try {
+  //       const data = new Uint8Array(e.target.result);
+  //       const workbook = XLSX.read(data, { type: 'array' });
+  //       const firstSheetName = workbook.SheetNames[0];
+  //       const worksheet = workbook.Sheets[firstSheetName];
+  //       const range = XLSX.utils.decode_range(worksheet['!ref']);
+  //       for (let row = range.s.r; row <= range.e.r; row++) {
+  //         const rowData = [];
+  //         for (let col = range.s.c; col <= range.e.c; col++) { 
+  //           rowData.push(getCellValue(worksheet, row, col));
+  //         }
+  //         allData.push(rowData);
+  //       }
+  //       console.log(123);
+  //     } catch (error) {
+  //       console.log('解析失败:', error);
+  //       alert('解析失败，请检查文件格式！');
+  //     }
+  //   };
+  //   if (!file) {
+  //     alert('请先选择 Excel 文件！');
+  //     return;
+  //   }
+  //   reader.readAsArrayBuffer(file);
+  //   // file = null;
+  //   // fileInput.value = '';
+  //   let selectVal = document.getElementById("operator-type").value;
+  //   const hh = document.createElement('script');
+  //   hh.src = chrome.runtime.getURL(`utils/m${selectVal}.js`);
+  //   document.body.appendChild(hh);
+  //   document.getElementById('startTask').disabled = true;
+  // });
 
   window.addEventListener("message", (event) => {
     if (event.data.type === "EXTENSION_READY") {
