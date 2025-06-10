@@ -1,5 +1,5 @@
 const func = document.currentScript.dataset.func;
-const args = document.currentScript.dataset.args;
+const args = JSON.parse(document.currentScript.dataset.args || "[]");
 if (window.myExtensionFuncs?.[func]) {
-    window.myExtensionFuncs[func](JSON.parse(args));
+    window.myExtensionFuncs[func](...args);
 }

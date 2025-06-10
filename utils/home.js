@@ -1,7 +1,17 @@
+let headers = [];
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "REQUEST_HEADERS") {
+    if (message.headers.length > headers.length) {
+      headers = message.headers;
+    }
+    console.log("从后台接收到的请求头：", headers);
+  }
+});
+
 function clickPage() {
   const actionList = [
-      {'label': '广东省新平台议价', 'js': '112', 'flag': 1, 'province': '广东省'},
-      {'label': '广东省新平台签章', 'js': '111', 'flag': 1, 'province': '广东省'},
+      {'label': '广州市平台议价', 'js': '112', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
+      {'label': '广东省平台合同签章', 'js': '111', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/tps_local', 'province': '广东省'},
       {'label': '点配送', 'js': '111111', 'flag': 0, 'province': '广东省'},
       {'label': '点配送', 'js': '111111', 'flag': 0, 'province': '广东省'},
   ]
@@ -86,48 +96,12 @@ function clickPage() {
     }
   });
 
-  // document.getElementById('startTask').addEventListener('click', () => {
-  //   const reader = new FileReader();
-  //   reader.onload = (e) => {
-  //     try {
-  //       const data = new Uint8Array(e.target.result);
-  //       const workbook = XLSX.read(data, { type: 'array' });
-  //       const firstSheetName = workbook.SheetNames[0];
-  //       const worksheet = workbook.Sheets[firstSheetName];
-  //       const range = XLSX.utils.decode_range(worksheet['!ref']);
-  //       for (let row = range.s.r; row <= range.e.r; row++) {
-  //         const rowData = [];
-  //         for (let col = range.s.c; col <= range.e.c; col++) { 
-  //           rowData.push(getCellValue(worksheet, row, col));
-  //         }
-  //         allData.push(rowData);
-  //       }
-  //       console.log(123);
-  //     } catch (error) {
-  //       console.log('解析失败:', error);
-  //       alert('解析失败，请检查文件格式！');
-  //     }
-  //   };
-  //   if (!file) {
-  //     alert('请先选择 Excel 文件！');
-  //     return;
-  //   }
-  //   reader.readAsArrayBuffer(file);
-  //   // file = null;
-  //   // fileInput.value = '';
-  //   let selectVal = document.getElementById("operator-type").value;
-  //   const hh = document.createElement('script');
-  //   hh.src = chrome.runtime.getURL(`utils/m${selectVal}.js`);
-  //   document.body.appendChild(hh);
-  //   document.getElementById('startTask').disabled = true;
-  // });
-
   window.addEventListener("message", (event) => {
     if (event.data.type === "EXTENSION_READY") {
       const script = document.createElement("script");
       script.src = chrome.runtime.getURL("utils/caller.js");
       script.dataset.func = "startTask";
-      script.dataset.args = JSON.stringify(allData);
+      script.dataset.args = JSON.stringify([allData, headers]);
       document.body.appendChild(script);
     }
   });

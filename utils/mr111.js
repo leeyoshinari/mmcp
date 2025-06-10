@@ -1,13 +1,12 @@
-// 广东省新平台签章
+// 广东省平台合同签章
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
 
-async function fetchPost(url, data, headers) {
+async function fetchPost(url, data, myheader) {
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      ...headers,
+      ...myheader,
     },
     body: JSON.stringify(data),
   });
@@ -15,11 +14,11 @@ async function fetchPost(url, data, headers) {
   return await response.json();
 }
 
-async function fetchGet(url, headers) {
+async function fetchGet(url, myheader) {
   const response = await fetch(url, {
     method: 'GET',
     headers: {
-      ...headers,
+      ...myheader,
     },
   });
   if (!response.ok) throw new Error('Request Error:' + response.status);
@@ -48,8 +47,20 @@ function exportText(text) {
   console.log(text);
 }
 
+function convertHeadersArrayToObject(headersArray) {
+  const headersObject = {};
+  headersArray.forEach(header => {
+    if (header.name) {
+      headersObject[header.name.toLowerCase()] = header.value;
+    }
+  });
+  return headersObject;
+}
+
+
 const socket_port = 10443;
 const request_origin = "45B45638-A006-4cf1-A298-816B376D867E";
+let headers = [];
 let request_id = 1;
 let certCode = '';
 let sealImageBase64 = '';
@@ -299,88 +310,69 @@ async function batch_audit_not_pass(res, reason_text) {
     }
 }
 
-async function run_task(ms_code, is_sign) {
-    if (ms_code && is_sign) {
-        try {
-            timer(1000);
-            let res = {};
-            res = await query_protocol_list(ms_code, res);
-            if (is_sign !== '签章') {
-                await batch_audit_not_pass(res, is_sign);
-                success += 1;
-                exportText(`拒绝成功，协议编号：${ms_code}，合同执行：${is_sign}`);
-                return;
-            }
-            const pdf_bs64 = await download_file(res.fileId);
-            const fileEncode = await sign_name(pdf_bs64);
-            await update_sign_status(res, fileEncode);
-            success += 1;
-            exportText(`签章成功，协议编号：${ms_code}，合同执行：${is_sign}`);
-        } catch (error) {
-            exportText(`签章失败，协议编号：${ms_code}，合同执行：${is_sign}，错误：${error.message}`);
+async function checkout_user() {
+    try {
+        const url = `${host}/ggfw/custom_emp_chl/api/v1/ggfw_pss_cw_local/empUser/getTokenInfo`;
+        const response = await fetchPost(url, null, headers);
+        console.log(headers);
+        if (response.code !== 0 || !response.success) {
+            console.log(response);
         }
-    } else {
-        exportText(`Excel表格中的数据不全，协议编号：${ms_code}，合同执行：${is_sign}`);
+    } catch (error) {
+        return;
     }
 }
 
-async function startTask(data) {
+async function startTask(data, header) {
   let total_num = 0;
   let success_num = 0;
+  const authHeader = header.find(h => h.name.toLowerCase() === 'authorization');
+  if (authHeader) {header.push({"name": "accessToken", "value": authHeader.value});}
+  headers = convertHeadersArrayToObject(header);
+  console.log(data, headers);
   try {
+    await checkout_user();
+    res = await query_protocol_list('TTP4400002025060912268', {});
+    exportText(res);
     let i = 0;
     for (i; i < data.length; i++) {
-      if (data[i][1] === '议价号') break;
+      if (data[i][1] === '协议编号') break;
     }
     i += 1;
     for (i; i < data.length; i++) {
       if (!data[i][1]) continue;
       total_num += 1;
       let ms_code = data[i][1];
-      let is_agree = data[i][2];
+      let is_sign = data[i][2].trim();
       try {
         ms_code = ms_code.trim();
       } catch (err) {
         ms_code = String(parseInt(ms_code)).trim();
       }
-      try {
-        is_agree = is_agree.trim();
-      } catch (err) {
-        is_agree = String(is_agree).trim();
-      }
-      if (ms_code && is_agree) {
+      if (ms_code && is_sign) {
         try {
-          timer(1000);
-          let res = {};
-          if (is_agree === '同意') {
-            res = await queryCode(ms_code, res);
-            res = {
-              ...res,
-              bargainStatus: 1,
-              companyBargain: 0
-            };
-          } else {
-            try {
-              const newPrice = parseFloat(is_agree);
-              res = {
-                bargainId: String(ms_code),
-                bargainStatus: 2,
-                companyBargain: parseFloat(is_agree).toString()
-              };
-            } catch (error) {
-              exportText(`该操作暂不支持，议价号：${ms_code}，议价执行：${is_agree}`);
-              continue;
+            timer(1000);
+            let res = {};
+            res = await query_protocol_list(ms_code, res);
+            if (is_sign !== '签章') {
+                await batch_audit_not_pass(res, is_sign);
+                success_num += 1;
+                exportText(`拒绝成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
+                continue;
             }
-          }
-          await agreeBargain(res);
-          success_num += 1;
-          exportText(`议价成功，议价号：${ms_code}，议价执行：${is_agree}`);
-        } catch (err) {
-          exportText(`议价失败，议价号：${ms_code}，议价执行：${is_agree}。Error: ${err}`);
+            const pdf_bs64 = await download_file(res.fileId);
+            const fileEncode = await sign_name(pdf_bs64);
+            await update_sign_status(res, fileEncode);
+            success_num += 1;
+            exportText(`签章成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
+        } catch (error) {
+            exportText(`签章失败, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 错误: ${error.stack}`);
         }
+      } else {
+        exportText(`Excel表格中的数据不全, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
       }
     }
-    exportText(`总数：${total_num}，议价成功：${success_num}，议价失败：${total_num - success_num}`);
+    exportText(`总数：${total_num}，签章成功：${success_num}，签章失败：${total_num - success_num}`);
   } catch (err) {
     exportText(`失败，请重试: ${err.stack}`);
   }
@@ -388,7 +380,7 @@ async function startTask(data) {
 }
 
 window.myExtensionFuncs = {
-  startTask: (data) => startTask(data)
+  startTask: (data, headers) => startTask(data, headers)
 };
 window.postMessage(
   { type: "EXTENSION_READY", funcs: ["startTask"] }, 

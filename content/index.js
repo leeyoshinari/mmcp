@@ -9,7 +9,7 @@ window.addEventListener('load', () => {
         document.getElementById('startTask').addEventListener('click', () => {
             let selectVal = document.getElementById("operator-type").value;
             const hh = document.createElement('script');
-            hh.src = chrome.runtime.getURL(`utils/${btoa(btoa(selectVal).toLowerCase() + 'mr').toLowerCase()}.js`);
+            hh.src = chrome.runtime.getURL(`utils/${'mr' + selectVal}.js`);
             document.body.appendChild(hh);
             document.getElementById('startTask').disabled = true;
         });
@@ -17,8 +17,8 @@ window.addEventListener('load', () => {
     myDiv.appendChild(tipsImg);
     document.body.appendChild(myDiv);
 
-    if (document.body.innerHTML.indexOf('百度') < 1) {
-        let s = document.getElementsByClassName("float-tips")[0];
-        document.body.removeChild(s);
-    }
+    // if (document.body.innerHTML.indexOf('迈瑞') < 1) {
+    //     let s = document.getElementsByClassName("float-tips")[0];
+    //     document.body.removeChild(s);
+    // }
 });

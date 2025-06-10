@@ -12,10 +12,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://www.baidu.com/*"],
+      "matches": ["*://igi.hsa.gd.gov.cn/*"],
       "css": ["content/index.css"],
-      "js": ["content/index.js", "utils/home.js", "utils/xlsx.full.min.js"],
-      "run_at": "document_idle"
+      "js": ["content/index.js", "utils/home.js", "utils/xlsx.full.min.js"]
     }
   ],
   "web_accessible_resources": [
@@ -24,5 +23,6 @@
       "matches": ["<all_urls>"]
     }
   ],
-  "permissions": ["scripting", "activeTab", "notifications", "tabs"]
+  "host_permissions": ["<all_urls>"],
+  "permissions": ["scripting", "activeTab", "notifications", "tabs", "webRequest", "webRequestAuthProvider"]
 }

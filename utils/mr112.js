@@ -1,4 +1,4 @@
-// 广东省新平台议价
+// 广州市平台议价
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
 

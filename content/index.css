@@ -20,7 +20,7 @@
     flex-direction: column;
     z-index: 99999;
     background-color: aliceblue;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 .float-container .filter {
