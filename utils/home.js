@@ -1,21 +1,11 @@
-let headers = [];
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "REQUEST_HEADERS") {
-    if (message.headers.length > headers.length) {
-      headers = message.headers;
-    }
-    console.log("从后台接收到的请求头：", headers);
-  }
-});
-
+const actionList = [
+  {'label': '广州市平台议价', 'js': '112', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
+  {'label': '广东省平台合同签章', 'js': '111', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/tps_local', 'province': '广东省'},
+  {'label': '点配送', 'js': '211', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/tps_local', 'province': '广东省'},
+  {'label': '点配送', 'js': '111111', 'flag': 0, 'url': '', 'province': '广东省'},
+]
+const allData = [];
 function clickPage() {
-  const actionList = [
-      {'label': '广州市平台议价', 'js': '112', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
-      {'label': '广东省平台合同签章', 'js': '111', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/tps_local', 'province': '广东省'},
-      {'label': '点配送', 'js': '111111', 'flag': 0, 'province': '广东省'},
-      {'label': '点配送', 'js': '111111', 'flag': 0, 'province': '广东省'},
-  ]
-  const allData = [];
   let options = '';
   actionList.forEach((item) => {if (item.flag) options += `<option value=${item.js}>${item.label}</option>`;});
   const uploadEle = `<div class="filter"><div style="display: flex;"><label>操作类型:</label><select id="operator-type">${options}</select></div>
@@ -93,16 +83,6 @@ function clickPage() {
       };
       reader.readAsArrayBuffer(file);
       fileInput.value = '';
-    }
-  });
-
-  window.addEventListener("message", (event) => {
-    if (event.data.type === "EXTENSION_READY") {
-      const script = document.createElement("script");
-      script.src = chrome.runtime.getURL("utils/caller.js");
-      script.dataset.func = "startTask";
-      script.dataset.args = JSON.stringify([allData, headers]);
-      document.body.appendChild(script);
     }
   });
 }

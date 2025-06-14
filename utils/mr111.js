@@ -1,63 +1,6 @@
 // 广东省平台合同签章
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
-
-async function fetchPost(url, data, myheader) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      ...myheader,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Request Error:' + response.status);
-  return await response.json();
-}
-
-async function fetchGet(url, myheader) {
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...myheader,
-    },
-  });
-  if (!response.ok) throw new Error('Request Error:' + response.status);
-  return await response.json();
-}
-
-function timer(millisecond) {
-  let startTime = (new Date()).getTime();
-  while ((new Date()).getTime() - startTime < millisecond) {
-    continue;
-  }
-}
-
-function exportText(text) {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-  text = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds} - ${text}`;
-  textContainer.textContent += text + '\n';
-  textContainer.scrollTop = textContainer.scrollHeight;
-  console.log(text);
-}
-
-function convertHeadersArrayToObject(headersArray) {
-  const headersObject = {};
-  headersArray.forEach(header => {
-    if (header.name) {
-      headersObject[header.name.toLowerCase()] = header.value;
-    }
-  });
-  return headersObject;
-}
-
-
 const socket_port = 10443;
 const request_origin = "45B45638-A006-4cf1-A298-816B376D867E";
 let headers = [];
@@ -310,30 +253,12 @@ async function batch_audit_not_pass(res, reason_text) {
     }
 }
 
-async function checkout_user() {
-    try {
-        const url = `${host}/ggfw/custom_emp_chl/api/v1/ggfw_pss_cw_local/empUser/getTokenInfo`;
-        const response = await fetchPost(url, null, headers);
-        console.log(headers);
-        if (response.code !== 0 || !response.success) {
-            console.log(response);
-        }
-    } catch (error) {
-        return;
-    }
-}
-
 async function startTask(data, header) {
   let total_num = 0;
   let success_num = 0;
-  const authHeader = header.find(h => h.name.toLowerCase() === 'authorization');
-  if (authHeader) {header.push({"name": "accessToken", "value": authHeader.value});}
   headers = convertHeadersArrayToObject(header);
-  console.log(data, headers);
+  headers['content-type'] = 'application/json;charset=UTF-8';
   try {
-    await checkout_user();
-    res = await query_protocol_list('TTP4400002025060912268', {});
-    exportText(res);
     let i = 0;
     for (i; i < data.length; i++) {
       if (data[i][1] === '协议编号') break;
