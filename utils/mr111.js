@@ -1,12 +1,12 @@
 // 广东省平台合同签章
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
-const socket_port = 10443;
 const request_origin = "45B45638-A006-4cf1-A298-816B376D867E";
 let headers = [];
 let request_id = 1;
 let certCode = '';
 let sealImageBase64 = '';
+let ws;
 const pos_data = {
     "yp_point": {
         "1": {"xPos": -180, "yPos": 550},
@@ -35,84 +35,6 @@ const pos_data = {
         "pageNum": 4
     }
 };
-
-
-try {
-    const ws = new WebSocket(`wss://127.0.0.1:${socket_port}`, ['crypto-jsonrpc-protocol']);
-    ws.onopen = async () => {
-        const request_data = JSON.stringify({
-            "requestVersion": 1,
-            "requestOrigin": request_origin,
-            "requestId": request_id,
-            "requestQuery": {
-                "function": "GetCertStringAttribute",
-                "param": {
-                    "cert": {
-                        "encode": null,
-                        "type": "{\"UIFlag\":\"default\", \"InValidity\":true,\"Type\":\"signature\", \"Method\":\"device\",\"Value\":\"any\"}",
-                        "condition": "IssuerCN~'NETCA' && InValidity='True' && CertType='Signature'"
-                    },
-                    "id": -1
-                }
-            }
-        });
-        ws.send(request_data);
-        const response = await new Promise((resolve) => {
-            ws.onmessage = (event) => resolve(event.data);
-        });
-        request_id += 1;
-        const res_json = JSON.parse(response);
-        certCode = res_json.responseEntity.certCode;
-        
-        const request_data2 = JSON.stringify({
-            "requestVersion": 1,
-            "requestOrigin": request_origin,
-            "requestId": request_id,
-            "requestQuery": {
-                "function": "GetNetcaSealImage",
-                "param": {
-                    "cert": {
-                        "encode": certCode
-                    }
-                }
-            }
-        });
-        ws.send(request_data2);
-        const response2 = await new Promise((resolve) => {
-            ws.onmessage = (event) => resolve(event.data);
-        });
-        request_id += 1;
-        const res_json2 = JSON.parse(response2);
-        sealImageBase64 = res_json2.responseEntity.sealImageBase64;
-        
-        const request_data3 = JSON.stringify({
-            "requestVersion": 1,
-            "requestOrigin": request_origin,
-            "requestId": request_id,
-            "requestQuery": {
-                "function": "ClearPwdCache",
-                "param": {}
-            }
-        });
-        ws.send(request_data3);
-        const response3 = await new Promise((resolve) => {
-            ws.onmessage = (event) => resolve(event.data);
-        });
-        request_id += 1;
-        const res_json3 = JSON.parse(response3);
-        if (res_json3.responseResult.msg !== "成功") {
-            exportText(`清除密码缓存失败, ClearPwdCache, ${res_json3.responseResult.msg}`);
-        }
-    };
-    
-    ws.onerror = (error) => {
-        exportText(`WebSocket错误: ${error.stack}`);
-        alert('无法连接 CA, 请正确插入CA证书');
-    };
-} catch (error) {
-    exportText(`CA连接失败: ${error.stack}`);
-    alert('无法连接 CA, 请正确插入CA证书');
-}
 
 async function query_protocol_list(ms_code, res) {
     try {
@@ -259,6 +181,76 @@ async function startTask(data, header) {
   headers = convertHeadersArrayToObject(header);
   headers['content-type'] = 'application/json;charset=UTF-8';
   try {
+    try {
+        ws = await createWebSocket('wss://127.0.0.1:10443', ['crypto-jsonrpc-protocol']);
+        ws.onopen = async () => {
+            const request_data = JSON.stringify({
+                "requestVersion": 1,
+                "requestOrigin": request_origin,
+                "requestId": request_id,
+                "requestQuery": {
+                    "function": "GetCertStringAttribute",
+                    "param": {
+                        "cert": {
+                            "encode": null,
+                            "type": "{\"UIFlag\":\"default\", \"InValidity\":true,\"Type\":\"signature\", \"Method\":\"device\",\"Value\":\"any\"}",
+                            "condition": "IssuerCN~'NETCA' && InValidity='True' && CertType='Signature'"
+                        },
+                        "id": -1
+                    }
+                }
+            });
+            ws.send(request_data);
+            const response = await new Promise((resolve) => {
+                ws.onmessage = (event) => resolve(event.data);
+            });
+            request_id += 1;
+            const res_json = JSON.parse(response);
+            certCode = res_json.responseEntity.certCode;
+            
+            const request_data2 = JSON.stringify({
+                "requestVersion": 1,
+                "requestOrigin": request_origin,
+                "requestId": request_id,
+                "requestQuery": {
+                    "function": "GetNetcaSealImage",
+                    "param": {
+                        "cert": {
+                            "encode": certCode
+                        }
+                    }
+                }
+            });
+            ws.send(request_data2);
+            const response2 = await new Promise((resolve) => {
+                ws.onmessage = (event) => resolve(event.data);
+            });
+            request_id += 1;
+            const res_json2 = JSON.parse(response2);
+            sealImageBase64 = res_json2.responseEntity.sealImageBase64;
+            
+            const request_data3 = JSON.stringify({
+                "requestVersion": 1,
+                "requestOrigin": request_origin,
+                "requestId": request_id,
+                "requestQuery": {
+                    "function": "ClearPwdCache",
+                    "param": {}
+                }
+            });
+            ws.send(request_data3);
+            const response3 = await new Promise((resolve) => {
+                ws.onmessage = (event) => resolve(event.data);
+            });
+            request_id += 1;
+            const res_json3 = JSON.parse(response3);
+            if (res_json3.responseResult.msg !== "成功") {
+                exportText(`清除密码缓存失败, ClearPwdCache, ${res_json3.responseResult.msg}`);
+            }
+        };
+    } catch (error) {
+        throw new Error('无法连接 CA, 请正确插入CA证书');
+    }
     let i = 0;
     for (i; i < data.length; i++) {
       if (data[i][1] === '协议编号') break;

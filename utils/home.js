@@ -1,15 +1,16 @@
 const actionList = [
-  {'label': '广州市平台议价', 'js': '112', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
-  {'label': '广东省平台合同签章', 'js': '111', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/tps_local', 'province': '广东省'},
-  {'label': '点配送', 'js': '211', 'flag': 1, 'url': 'igi.hsa.gd.gov.cn/tps_local', 'province': '广东省'},
-  {'label': '点配送', 'js': '111111', 'flag': 0, 'url': '', 'province': '广东省'},
+  {'label': '广州市平台议价', 'js': '112', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
+  {'label': '广东省平台合同签章', 'js': '111', 'url': 'igi.hsa.gd.gov.cn/tps_local', 'province': '广东省'},
+  {'label': '深圳市平台点配送', 'js': '211', 'url': 'igi.hsa.gd.gov.cn', 'province': '深圳市'},
+  {'label': '点配送', 'js': '111111', 'url': '', 'province': '广东省'},
 ]
 const allData = [];
+const currentHost = window.location.host;
 function clickPage() {
   let options = '';
-  actionList.forEach((item) => {if (item.flag) options += `<option value=${item.js}>${item.label}</option>`;});
+  actionList.forEach((item) => {if (item.url.indexOf(currentHost) > -1) options += `<option value=${item.js}>${item.label}</option>`;});
   const uploadEle = `<div class="filter"><div style="display: flex;"><label>操作类型:</label><select id="operator-type">${options}</select></div>
-  <div><input type="file" id="excelUpload" accept=".xlsx, .xls, .csv" style="display: none;" /><input id="fileName" type="text" disabled placeholder="请选择Excel文件" /></div>
+  <div><input type="file" id="excelUpload" accept=".xlsx, .xls, .csv" style="display: none;" /><input id="fileName" type="text" disabled placeholder="请先选择Excel文件" /></div>
   <div style="display:flex;justify-content:space-around;"><button id="parseExcel">选择 Excel</button><button id="startTask">开始执行</button></div></div><div class="logs"></div>`;
   const pages = document.createElement("div");
   pages.className = 'float-container';
@@ -59,7 +60,7 @@ function clickPage() {
         return;
       }
       document.getElementById('fileName').value = file.name;
-      exportText(`你选择的文件名为：${file.name}`);
+      exportText(`已选择的文件名为：${file.name}`);
 
       const reader = new FileReader();
       reader.onload = (e) => {

@@ -21,6 +21,14 @@ async function fetchGet(url, myheader) {
   return await response.json();
 }
 
+function createWebSocket(url, protocols) {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(url, protocols);
+    ws.onopen = () => resolve(ws);
+    ws.onerror = (error) => reject(error);
+  });
+}
+
 function timer(millisecond) {
   let startTime = (new Date()).getTime();
   while ((new Date()).getTime() - startTime < millisecond) {
@@ -103,7 +111,7 @@ class FileTransferClient {
               retryCount++;
               setTimeout(tryConnect, this.retryDelay * Math.pow(2, retryCount - 1));
             } else {
-              reject(new Error(`无法连接到服务器，已尝试${this.maxRetries}次`));
+              reject(new Error(`无法连接到文件服务，已尝试${this.maxRetries}次`));
               this.connectionPromise = null;
             }
           }
