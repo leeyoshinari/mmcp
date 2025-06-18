@@ -1,3 +1,4 @@
+// terser home.js -o index.js --compress
 chrome.webRequest.onBeforeSendHeaders.addListener(
     function(details) {
         if (details.tabId <= 0) return;

@@ -2,7 +2,7 @@
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
 const request_origin = "45B45638-A006-4cf1-A298-816B376D867E";
-let headers = [];
+let headers = {};
 let request_id = 1;
 let certCode = '';
 let sealImageBase64 = '';
@@ -36,14 +36,14 @@ const pos_data = {
     }
 };
 
-async function query_protocol_list(ms_code, res) {
+async function query_protocol_list(ms_code, res, item_name) {
     try {
         const url = `${host}/tps_local_bd/web/mcstrans/ttpCntrSummary/prodentp/query_page`;
         const data = {
             "cntrStas": "",
             "current": 1,
             "medinsCode": "",
-            "itemName": "",
+            "itemName": item_name || "",
             "prodName": "",
             "prodCode": "",
             "prodType": "2",
@@ -63,7 +63,7 @@ async function query_protocol_list(ms_code, res) {
             throw new Error(`交易协议列表查询为空, 响应值: ${JSON.stringify(response)}`);
         }
     } catch (error) {
-        exportText(`交易协议列表查询失败, 协议编号: ${ms_code}, 错误: ${error.stack}`);
+        exportText(`交易协议列表查询失败, 协议编号: ${ms_code}, 项目名称: ${item_name}, 错误: ${error.stack}`);
         throw error;
     }
 }
@@ -127,7 +127,7 @@ async function sign_name(pdf_base64) {
         request_id += 1;
         const res_json = JSON.parse(response);
         if (res_json.responseResult.msg !== "成功") {
-            throw new Error("CA签章失败");
+            throw new Error(`CA签章失败, ${response}`);
         }
         const destFileEncode = res_json.responseEntity.destFileEncode;
         return destFileEncode;
@@ -183,71 +183,77 @@ async function startTask(data, header) {
   try {
     try {
         ws = await createWebSocket('wss://127.0.0.1:10443', ['crypto-jsonrpc-protocol']);
-        ws.onopen = async () => {
-            const request_data = JSON.stringify({
-                "requestVersion": 1,
-                "requestOrigin": request_origin,
-                "requestId": request_id,
-                "requestQuery": {
-                    "function": "GetCertStringAttribute",
-                    "param": {
-                        "cert": {
-                            "encode": null,
-                            "type": "{\"UIFlag\":\"default\", \"InValidity\":true,\"Type\":\"signature\", \"Method\":\"device\",\"Value\":\"any\"}",
-                            "condition": "IssuerCN~'NETCA' && InValidity='True' && CertType='Signature'"
-                        },
-                        "id": -1
-                    }
+        const request_data = JSON.stringify({
+            "requestVersion": 1,
+            "requestOrigin": request_origin,
+            "requestId": request_id,
+            "requestQuery": {
+                "function": "GetCertStringAttribute",
+                "param": {
+                    "cert": {
+                        "encode": null,
+                        "type": "{\"UIFlag\":\"default\", \"InValidity\":true,\"Type\":\"signature\", \"Method\":\"device\",\"Value\":\"any\"}",
+                        "condition": "IssuerCN~'NETCA' && InValidity='True' && CertType='Signature'"
+                    },
+                    "id": -1
                 }
-            });
-            ws.send(request_data);
-            const response = await new Promise((resolve) => {
-                ws.onmessage = (event) => resolve(event.data);
-            });
-            request_id += 1;
-            const res_json = JSON.parse(response);
-            certCode = res_json.responseEntity.certCode;
-            
-            const request_data2 = JSON.stringify({
-                "requestVersion": 1,
-                "requestOrigin": request_origin,
-                "requestId": request_id,
-                "requestQuery": {
-                    "function": "GetNetcaSealImage",
-                    "param": {
-                        "cert": {
-                            "encode": certCode
-                        }
-                    }
-                }
-            });
-            ws.send(request_data2);
-            const response2 = await new Promise((resolve) => {
-                ws.onmessage = (event) => resolve(event.data);
-            });
-            request_id += 1;
-            const res_json2 = JSON.parse(response2);
-            sealImageBase64 = res_json2.responseEntity.sealImageBase64;
-            
-            const request_data3 = JSON.stringify({
-                "requestVersion": 1,
-                "requestOrigin": request_origin,
-                "requestId": request_id,
-                "requestQuery": {
-                    "function": "ClearPwdCache",
-                    "param": {}
-                }
-            });
-            ws.send(request_data3);
-            const response3 = await new Promise((resolve) => {
-                ws.onmessage = (event) => resolve(event.data);
-            });
-            request_id += 1;
-            const res_json3 = JSON.parse(response3);
-            if (res_json3.responseResult.msg !== "成功") {
-                exportText(`清除密码缓存失败, ClearPwdCache, ${res_json3.responseResult.msg}`);
             }
-        };
+        });
+        ws.send(request_data);
+        const response = await new Promise((resolve) => {
+            ws.onmessage = (event) => resolve(event.data);
+        });
+        request_id += 1;
+        const res_json = JSON.parse(response);
+        if (res_json.responseEntity.certCode) {
+            certCode = res_json.responseEntity.certCode;
+        } else {
+            exportText(`第 ${request_id} 次请求结果, ${response}`);
+        }
+        
+        const request_data2 = JSON.stringify({
+            "requestVersion": 1,
+            "requestOrigin": request_origin,
+            "requestId": request_id,
+            "requestQuery": {
+                "function": "GetNetcaSealImage",
+                "param": {
+                    "cert": {
+                        "encode": certCode
+                    }
+                }
+            }
+        });
+        ws.send(request_data2);
+        const response2 = await new Promise((resolve) => {
+            ws.onmessage = (event) => resolve(event.data);
+        });
+        request_id += 1;
+        const res_json2 = JSON.parse(response2);
+        if (res_json2.responseEntity.sealImageBase64) {
+            sealImageBase64 = res_json2.responseEntity.sealImageBase64;
+        } else {
+            exportText(`第 ${request_id} 次请求结果, ${response2}`);
+        }
+        
+        const request_data3 = JSON.stringify({
+            "requestVersion": 1,
+            "requestOrigin": request_origin,
+            "requestId": request_id,
+            "requestQuery": {
+                "function": "ClearPwdCache",
+                "param": {}
+            }
+        });
+        ws.send(request_data3);
+        const response3 = await new Promise((resolve) => {
+            ws.onmessage = (event) => resolve(event.data);
+        });
+        request_id += 1;
+        const res_json3 = JSON.parse(response3);
+        if (res_json3.responseResult.msg !== "成功") {
+            exportText(`清除密码缓存失败, ClearPwdCache, ${res_json3.responseResult.msg}`);
+        }
     } catch (error) {
         throw new Error('无法连接 CA, 请正确插入CA证书');
     }
@@ -261,6 +267,7 @@ async function startTask(data, header) {
       total_num += 1;
       let ms_code = data[i][1];
       let is_sign = data[i][2].trim();
+      let item_name = data[i][3].trim();
       try {
         ms_code = ms_code.trim();
       } catch (err) {
@@ -270,23 +277,23 @@ async function startTask(data, header) {
         try {
             timer(1000);
             let res = {};
-            res = await query_protocol_list(ms_code, res);
+            res = await query_protocol_list(ms_code, res, item_name);
             if (is_sign !== '签章') {
                 await batch_audit_not_pass(res, is_sign);
                 success_num += 1;
-                exportText(`拒绝成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
+                exportText(`拒绝成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 项目名称: ${item_name}`);
                 continue;
             }
             const pdf_bs64 = await download_file(res.fileId);
             const fileEncode = await sign_name(pdf_bs64);
             await update_sign_status(res, fileEncode);
             success_num += 1;
-            exportText(`签章成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
+            exportText(`签章成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 项目名称: ${item_name}`);
         } catch (error) {
-            exportText(`签章失败, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 错误: ${error.stack}`);
+            exportText(`签章失败, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 项目名称: ${item_name}, 错误: ${error.stack}`);
         }
       } else {
-        exportText(`Excel表格中的数据不全, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
+        exportText(`Excel表格中的数据不全, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 项目名称: ${item_name}`);
       }
     }
     exportText(`总数：${total_num}，签章成功：${success_num}，签章失败：${total_num - success_num}`);

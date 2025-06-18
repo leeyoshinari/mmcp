@@ -1,7 +1,7 @@
 // 广州市平台议价
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
-let headers = [];
+let headers = {};
 
 async function queryCode(msCode, res) {
     try {
@@ -93,7 +93,7 @@ async function startTask(data, header) {
           success_num += 1;
           exportText(`议价成功，议价号：${ms_code}，议价执行：${is_agree}`);
         } catch (err) {
-          exportText(`议价失败，议价号：${ms_code}，议价执行：${is_agree}。Error: ${err}`);
+          exportText(`议价失败，议价号：${ms_code}，议价执行：${is_agree}。Error: ${err.stack}`);
         }
       }
     }

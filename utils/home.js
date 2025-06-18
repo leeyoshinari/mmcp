@@ -1,8 +1,10 @@
 const actionList = [
-  {'label': '广州市平台议价', 'js': '112', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
+  {'label': '广东省平台点配送', 'js': '212', 'url': 'igi.hsa.gd.gov.cn/tps_local', 'province': '广东省'},
   {'label': '广东省平台合同签章', 'js': '111', 'url': 'igi.hsa.gd.gov.cn/tps_local', 'province': '广东省'},
-  {'label': '深圳市平台点配送', 'js': '211', 'url': 'igi.hsa.gd.gov.cn', 'province': '深圳市'},
-  {'label': '点配送', 'js': '111111', 'url': '', 'province': '广东省'},
+  {'label': '广州市平台点配送', 'js': '115', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
+  {'label': '广州市平台议价', 'js': '112', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
+  {'label': '深圳市平台点配送', 'js': '211', 'url': '', 'province': '深圳市'},
+  {'label': '点配送', 'js': '113', 'url': 'www.baidu.com', 'province': '广东省'},
 ]
 const allData = [];
 const currentHost = window.location.host;

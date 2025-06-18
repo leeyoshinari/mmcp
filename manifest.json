@@ -14,7 +14,7 @@
     {
       "matches": ["*://igi.hsa.gd.gov.cn/*"],
       "css": ["content/index.css"],
-      "js": ["content/index.js", "utils/home.js", "utils/xlsx.full.min.js"]
+      "js": ["content/index.js", "utils/index.js", "utils/xlsx.full.min.js"]
     }
   ],
   "web_accessible_resources": [

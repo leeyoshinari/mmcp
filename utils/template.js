@@ -36,6 +36,10 @@ function timer(millisecond) {
   }
 }
 
+function calc_md5(data) {
+  return crypto.createHash('md5').update(data, 'utf8').digest('hex');
+}
+
 function exportText(text) {
   const now = new Date();
   const year = now.getFullYear();

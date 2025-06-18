@@ -7,7 +7,7 @@ const company_dict = {};
 let request_id = 1;
 const request_origin = "45B45638-A006-4cf1-A298-816B376D867E";
 let certCode = '';
-let headers = [];
+let headers = {};
 let ws;
 
 async function query_company(company, agreement_type, res) {
@@ -250,10 +250,6 @@ async function query_submit_list(goods_id, agreement_id, company, hospital) {
     exportText(`配送关系查询失败, 产品代码: ${goods_id}, 配送企业: ${company}, 错误: ${error.stack}`);
     throw error;
   }
-}
-
-function calc_md5(data) {
-  return crypto.createHash('md5').update(data).digest('hex');
 }
 
 async function startTask(data, header) {
