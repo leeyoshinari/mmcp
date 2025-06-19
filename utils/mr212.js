@@ -223,7 +223,7 @@ async function submit_c(res) {
     }
 }
 
-function parseExcelData(allData) {
+async function parseExcelData(allData) {
     const resDict = {};
     let ind = 1;
     
@@ -245,11 +245,11 @@ function parseExcelData(allData) {
         }
         
         const company = allData[i][2]?.toString().trim() || '';
-        const orgMd5 = calc_md5(company);
+        const orgMd5 = await calc_md5(company);
         const isCity = allData[i][3]?.toString().trim() || '';
         const city = allData[i][4]?.toString().trim() || '';
         const district = isCity === '地市' ? null : (allData[i][5]?.toString().trim() || '');
-        const areaMd5 = calc_md5(`${city}_${district}`);
+        const areaMd5 = await calc_md5(`${city}_${district}`);
         const tenditmName = allData[i][7]?.toString().trim() || '';
         
         if (resDict[orgMd5]) {
@@ -290,7 +290,7 @@ async function startTask(data, header) {
     headers = convertHeadersArrayToObject(header);
     headers['content-type'] = 'application/json;charset=UTF-8';
     try {
-        excel_data = parseExcelData(data);
+        excel_data = await parseExcelData(data);
         for (const [_, v] of Object.entries(excel_data)) {
             const company = v.k;
             for (const [_, vv] of Object.entries(v.v)) {
@@ -343,7 +343,7 @@ async function startTask(data, header) {
         }
         exportText(`总数: ${total_num}, 配送成功: ${success + resubmit_num}, 配送失败: ${total_num - success - resubmit_num}`);
     } catch (error) {
-        exportText(`失败, 请重试: ${err.stack}`);
+        exportText(`失败, 请重试: ${error.stack}`);
     }
     exportText("已结束, 请刷新页面后继续操作 (^_^)");
 }

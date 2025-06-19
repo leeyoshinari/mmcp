@@ -28,9 +28,9 @@ async function query_company(company, res) {
                     return res;
                 }
             }
-            throw new Error(`配送企业查询到多个，配送企业：${company}，配送地区：${areas.join(',')}，查询结果：${JSON.stringify(res_json['data']['records'])}`);
+            throw new Error(`配送企业查询到多个, 配送企业: ${company}, 配送地区: ${areas.join(',')}, 查询结果: ${JSON.stringify(res_json['data']['records'])}`);
         } else {
-            throw new Error(`配送企业查询为空，配送企业：${company}，配送地区：${areas.join(',')}，响应值：${JSON.stringify(res_json['data'])}`);
+            throw new Error(`配送企业查询为空, 配送企业: ${company}, 配送地区: ${areas.join(',')}, 响应值: ${JSON.stringify(res_json['data'])}`);
         }
     } catch (error) {
         throw error;
@@ -56,22 +56,22 @@ async function query_send_list(ms_code, company, city, purchase_type) {
         if (res_json['code'] === 0 && res_json['data']) {
             if (res_json['data']['records'].length === 1) {
                 if (res_json['data']['records'][0]['prodAsocStatus'] === '99') {
-                    exportText(`当前配送关系状态为 已作废，正在重新提交。产品ID：${ms_code}，配送企业：${company}，配送区域：${city}, 采购来源：${purchase_type}`);
+                    exportText(`当前配送关系状态为 已作废, 正在重新提交。产品ID: ${ms_code}, 配送企业: ${company}, 配送区域: ${city}, 采购来源: ${purchase_type}`);
                     return -1;
                 } else {
                     const prodAsocStatus = Math.min(parseInt(res_json['data']['records'][0]['prodAsocStatus']), 3);
                     const statusText = ['生产未提交', '生产已提交', '已生效', '配送已拒绝'][prodAsocStatus];
-                    exportText(`当前配送关系状态为 ${statusText}，跳过不处理。产品ID：${ms_code}，配送企业：${company}，配送区域：${city}, 采购来源：${purchase_type}`);
+                    exportText(`当前配送关系状态为 ${statusText}, 跳过不处理。产品ID: ${ms_code}, 配送企业: ${company}, 配送区域: ${city}, 采购来源: ${purchase_type}`);
                     return -2;
                 }
             } else if (res_json['data']['records'].length > 1) {
-                exportText(`配送关系列表查询到多个，产品ID：${ms_code}，配送企业：${company}，配送区域：${city}, 采购来源：${purchase_type}，查询结果：${JSON.stringify(res_json['data']['records'])}`);
+                exportText(`配送关系列表查询到多个, 产品ID: ${ms_code}, 配送企业: ${company}, 配送区域: ${city}, 采购来源: ${purchase_type}, 查询结果: ${JSON.stringify(res_json['data']['records'])}`);
                 return -1;
             } else if (res_json['data']['records'].length === 0) {
                 return -1;
             }
         }
-        exportText(`配送关系列表查询异常，产品ID：${ms_code}，配送企业：${company}，配送区域：${city}, 采购来源：${purchase_type}，查询结果：${JSON.stringify(res_json)}`);
+        exportText(`配送关系列表查询异常, 产品ID: ${ms_code}, 配送企业: ${company}, 配送区域: ${city}, 采购来源: ${purchase_type}, 查询结果: ${JSON.stringify(res_json)}`);
         return -1;
     } catch (error) {
         exportText(error.stack);
@@ -89,7 +89,7 @@ async function resubmit(schmProdId) {
         
         const res_json = await fetchPost(url, data, headers);
         if (res_json['code'] !== 0 || !res_json['success']) {
-            exportText(`配送关系重新提交失败，schmProdId：${schmProdId}，响应值：${JSON.stringify(res_json)}`);
+            exportText(`配送关系重新提交失败, schmProdId: ${schmProdId}, 响应值: ${JSON.stringify(res_json)}`);
             throw new Error(res_json['message']);
         }
     } catch (error) {
@@ -123,14 +123,14 @@ function query_areas(city, district, distributionType, res) {
                         }
                         break;
                     } else {
-                        throw new Error("区县数据为空，请检查excel表格数据");
+                        throw new Error("区县数据为空, 请检查excel表格数据");
                     }
                 }
             }
         }
         
         if (res["admdvsDtoList"].length === 0) {
-            throw new Error(`配送地区查询失败，所属市：${city}，所属区县：${district}`);
+            throw new Error(`配送地区查询失败, 所属市: ${city}, 所属区县: ${district}`);
         }
         return res;
     } catch (error) {
@@ -143,16 +143,16 @@ async function query_code(ms_code, company, purchase_type, res) {
         const url = `${host}/gpo/tps_local_bd/web/mcsTrade/distributionArea/getTrnsProdMcsScPage`;
         const schmProdId = await query_send_list(ms_code, company, res['admdvsDtoList'][0]['admdvsName'], purchase_type);
         if (schmProdId === -2) {
-            exportText(`当前配送关系已提交，跳过不处理。产品ID：${ms_code}，配送企业：${company}，配送地区：${res['admdvsDtoList'][0]['admdvsName']}, 采购来源：${purchase_type}`);
+            exportText(`当前配送关系已提交, 跳过不处理。产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${res['admdvsDtoList'][0]['admdvsName']}, 采购来源: ${purchase_type}`);
             return null;
         }
         
         if (schmProdId !== -1) {
             try {
                 await resubmit(schmProdId);
-                exportText(`配送关系重新提交成功，产品ID：${ms_code}，配送企业：${company}，配送地区：${res['admdvsDtoList'][0]['admdvsName']}, 采购来源：${purchase_type}`);
+                exportText(`配送关系重新提交成功, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${res['admdvsDtoList'][0]['admdvsName']}, 采购来源: ${purchase_type}`);
             } catch (error) {
-                exportText(`配送关系重新提交失败，产品ID：${ms_code}，配送企业：${company}，配送地区：${res['admdvsDtoList'][0]['admdvsName']}, 采购来源：${purchase_type}，错误：${error.stack}`);
+                exportText(`配送关系重新提交失败, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${res['admdvsDtoList'][0]['admdvsName']}, 采购来源: ${purchase_type}, 错误: ${error.stack}`);
             } finally {
                 return null;
             }
@@ -179,9 +179,9 @@ async function query_code(ms_code, company, purchase_type, res) {
             return res;
         } else {
             if (res_json['code'] !== 0) {
-                throw new Error(`产品ID查询结果为空，产品ID：${ms_code}, 采购来源：${purchase_type}，查询结果：${JSON.stringify(res_json)}`);
+                throw new Error(`产品ID查询结果为空, 产品ID: ${ms_code}, 采购来源: ${purchase_type}, 查询结果: ${JSON.stringify(res_json)}`);
             } else {
-                throw new Error(`产品ID查询结果为空或有多个，产品ID：${ms_code}, 采购来源：${purchase_type}，查询结果：${JSON.stringify(res_json['data']['records'])}`);
+                throw new Error(`产品ID查询结果为空或有多个, 产品ID: ${ms_code}, 采购来源: ${purchase_type}, 查询结果: ${JSON.stringify(res_json['data']['records'])}`);
             }
         }
     } catch (error) {
@@ -198,7 +198,7 @@ async function submit_c(res) {
         const res_json = await fetchPost(url, res, headers);
         if (res_json['code'] !== 0 || !res_json['success']) {
             const areas1 = res['admdvsDtoList'].map(adm => adm['admdvsName']);
-            exportText(`配送提交失败，商品ID：${res['drugDtoList'][0]['procurecatalogId']}，配送企业：${res['delventpname']}，配送地区：${areas1.join(',')}，响应值：${JSON.stringify(res_json)}`);
+            exportText(`配送提交失败, 商品ID: ${res['drugDtoList'][0]['procurecatalogId']}, 配送企业: ${res['delventpname']}, 配送地区: ${areas1.join(',')}, 响应值: ${JSON.stringify(res_json)}`);
             throw new Error(res_json['message']);
         }
     } catch (error) {
@@ -214,7 +214,7 @@ async function startTask(data, header) {
     try {
         let i = 0;
         for (i; i < data.length; i++) {
-            if (data[i][8] === '药交ID') break;
+            if (data[i][8] && data[i][8].toString().includes('产品ID')) break;
         }
         i += 1;
         for (i; i < data.length; i++) {
@@ -246,21 +246,21 @@ async function startTask(data, header) {
                     const areas = res['admdvsDtoList'].map(adm => adm['admdvsName']);
                     await submit_c(res);
                     success += 1;
-                    exportText(`配送成功，产品ID：${ms_code}，配送企业：${company}，配送地区：${areas.join(',')}, 采购来源：${purchase_type}`);
+                    exportText(`配送成功, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${areas.join(',')}, 采购来源: ${purchase_type}`);
                 } catch (error) {
                     const areas = is_city === '地市' ? city : district;
-                    exportText(`配送失败，产品ID：${ms_code}，配送企业：${company}，配送地区：${areas}, 采购来源：${purchase_type}, 错误：${error.stack}`);
+                    exportText(`配送失败, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${areas}, 采购来源: ${purchase_type}, 错误: ${error.stack}`);
                 }
             } else {
                 const areas = is_city === '地市' ? city : district;
-                exportText(`Excel表格中的数据不全，产品ID：${ms_code}，配送企业：${company}，配送地区：${areas}, 采购来源：${purchase_type}`);
+                exportText(`Excel表格中的数据不全, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${areas}, 采购来源: ${purchase_type}`);
             }
         }
-        exportText(`总数：${total_num}，配送成功：${success + resubmit_num}，配送失败：${total_num - success - resubmit_num}`);
+        exportText(`总数: ${total_num}, 配送成功: ${success + resubmit_num}, 配送失败: ${total_num - success - resubmit_num}`);
     } catch (error) {
-        exportText(`失败，请重试: ${err.stack}`);
+        exportText(`失败, 请重试: ${error.stack}`);
     }
-    exportText("已结束，请刷新页面后继续操作 (^_^)");
+    exportText("已结束, 请刷新页面后继续操作 (^_^)");
 }
 
 window.myExtensionFuncs = {

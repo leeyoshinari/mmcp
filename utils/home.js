@@ -12,7 +12,7 @@ function clickPage() {
   let options = '';
   actionList.forEach((item) => {if (item.url.indexOf(currentHost) > -1) options += `<option value=${item.js}>${item.label}</option>`;});
   const uploadEle = `<div class="filter"><div style="display: flex;"><label>操作类型:</label><select id="operator-type">${options}</select></div>
-  <div><input type="file" id="excelUpload" accept=".xlsx, .xls, .csv" style="display: none;" /><input id="fileName" type="text" disabled placeholder="请先选择Excel文件" /></div>
+  <div><input type="file" id="excelUpload" accept=".xlsx, .xls, .csv" style="display: none;" /><input id="fileName" type="text" placeholder="请先选择Excel文件" /></div>
   <div style="display:flex;justify-content:space-around;"><button id="parseExcel">选择 Excel</button><button id="startTask">开始执行</button></div></div><div class="logs"></div>`;
   const pages = document.createElement("div");
   pages.className = 'float-container';

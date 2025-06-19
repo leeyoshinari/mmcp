@@ -36,8 +36,13 @@ function timer(millisecond) {
   }
 }
 
-function calc_md5(data) {
-  return crypto.createHash('md5').update(data, 'utf8').digest('hex');
+async function calc_md5(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
 }
 
 function exportText(text) {

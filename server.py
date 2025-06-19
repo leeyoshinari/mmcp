@@ -24,7 +24,7 @@ config_path = os.path.join(current_path, 'config.conf')
 file_path = os.path.join(current_path, 'files')
 cfg = configparser.ConfigParser()
 cfg.read(config_path, encoding='utf-8')
-is_upload_file = int(cfg.get('default', 'UPLOAD_FILE', fallback=0))
+listen_port = int(cfg.get('default', 'PORT', fallback=0))
 is_windows = int(cfg.get('default', 'IS_WINDOW', fallback=0))
 window_title = cfg.get('default', 'WINDOW_TITLE', fallback='')
 button_title = cfg.get('default', 'WINDOW_CONFIRM', fallback='')
@@ -49,7 +49,7 @@ def deal_sign_window():
     while True:
         if is_open_window():
             try:
-                print('Windows is found')
+                print('Windows is found ~')
                 window = Application().connect(title=window_title).window(title=window_title)
                 window.child_window(class_name='Edit', top_level_only=False, found_index=edit_index).type_keys(sign_pwd)
                 time.sleep(0.5)
@@ -86,9 +86,17 @@ def deal_sign_window():
 async def handle_connection(websocket):
     try:
         async for message in websocket:
-            fileName = os.path.join(file_path, message)
+            data = json.loads(message)
+            if data['type'] == 1:
+                fileName = os.path.join(current_path, data['name'])
+            else:
+                fileName = os.path.join(file_path, data['name'])
+            abs_file_path = os.path.abspath(fileName)
+            if not abs_file_path.startswith(current_path):
+                await websocket.send("错误: 未授权的访问")
+                continue
             if not os.path.exists(fileName):
-                await websocket.send("错误: 文件不存在")
+                await websocket.send(f"错误: 文件 {data['name']} 不存在")
                 continue
 
             try:
@@ -104,7 +112,7 @@ async def handle_connection(websocket):
                     chunk = file_content[i:i + chunk_size]
                     await websocket.send(chunk)
                 await websocket.send("FILE_TRANSFER_COMPLETE")
-                print(f"文件 {message} 传输完成")
+                print(f"文件 {data['name']} 传输完成")
             except Exception as e:
                 await websocket.send(f"错误: 无法读取文件 ({str(e)})")
     except websockets.exceptions.ConnectionClosed:
@@ -116,19 +124,13 @@ if (is_windows == 1):
     t.start()
 
 
-if (is_upload_file == 1):
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    ssl_context.load_cert_chain(certfile="cert.pem", keyfile="key.pem")
-    ssl_context.verify_mode = ssl.CERT_NONE
-    ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
+# ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+# ssl_context.load_cert_chain(certfile="cert.pem", keyfile="key.pem")
+# ssl_context.verify_mode = ssl.CERT_NONE
+# ssl_context.minimum_version = ssl.TLSVersion.TLSv1_2
 
-    async def main():
-        start_server = await websockets.serve(handle_connection, host="127.0.0.1", port=8989)   # , ssl=ssl_context)
-        await start_server.wait_closed()
+async def main():
+    start_server = await websockets.serve(handle_connection, host="127.0.0.1", port=listen_port)   # , ssl=ssl_context)
+    await start_server.wait_closed()
 
-    asyncio.run(main())
-
-
-if is_upload_file != 1 and is_windows == 1:
-    while True:
-        time.sleep(0.05)
+asyncio.run(main())

@@ -42,7 +42,7 @@ async function query_company(company, agreement_type, res) {
       if (response.rows[agree_index].confirmStatusSc === 1 && 
         response.rows[agree_index].confirmStatusPs === 1) {
         res.agreementId = response.rows[agree_index].agreementId;
-        company_dict[calc_md5(company + agreement_type)] = response.rows[agree_index].agreementId;
+        company_dict[await calc_md5(company + agreement_type)] = response.rows[agree_index].agreementId;
         return res;
       } else {
         const scStatus = ['待签定', '已签定'][response.rows[agree_index].confirmStatusSc];
@@ -170,7 +170,7 @@ async function upload_file(file_name) {
       throw new Error("CA签章失败");
     }
     const destFileEncode = res_json1.responseEntity.UploadFileRespon;
-    auth_file_url[calc_md5(file_name)] = destFileEncode;
+    auth_file_url[await calc_md5(file_name)] = destFileEncode;
     return destFileEncode;
   } catch (error) {
     exportText(`授权文件上传失败, 文件名: ${file_name}, 错误: ${error.stack}`);
@@ -305,7 +305,7 @@ async function startTask(data, header) {
             
           let res = {};
           company = company.replace(' ', '');
-          const company_md5 = calc_md5(company + agreementType);
+          const company_md5 = await calc_md5(company + agreementType);
           if (company_dict[company_md5]) {
             res.agreementId = company_dict[company_md5];
           } else {
@@ -314,7 +314,7 @@ async function startTask(data, header) {
           res = await query_hospital(hospital, res);
           res = await query_code(ms_code, agreementType, res.agreementId, res);
           if (['23', '37'].includes(agreementType)) {
-            const auth_md5 = calc_md5(auth_file);
+            const auth_md5 = await calc_md5(auth_file);
             if (auth_file_url[auth_md5]) {
               res.authorUrl = auth_file_url[auth_md5];
             } else {

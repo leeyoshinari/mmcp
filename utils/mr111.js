@@ -36,14 +36,14 @@ const pos_data = {
     }
 };
 
-async function query_protocol_list(ms_code, res, item_name) {
+async function query_protocol_list(ms_code, res) {
     try {
         const url = `${host}/tps_local_bd/web/mcstrans/ttpCntrSummary/prodentp/query_page`;
         const data = {
             "cntrStas": "",
             "current": 1,
             "medinsCode": "",
-            "itemName": item_name || "",
+            "itemName": "",
             "prodName": "",
             "prodCode": "",
             "prodType": "2",
@@ -63,7 +63,7 @@ async function query_protocol_list(ms_code, res, item_name) {
             throw new Error(`交易协议列表查询为空, 响应值: ${JSON.stringify(response)}`);
         }
     } catch (error) {
-        exportText(`交易协议列表查询失败, 协议编号: ${ms_code}, 项目名称: ${item_name}, 错误: ${error.stack}`);
+        exportText(`交易协议列表查询失败, 协议编号: ${ms_code}, 错误: ${error.stack}`);
         throw error;
     }
 }
@@ -267,7 +267,6 @@ async function startTask(data, header) {
       total_num += 1;
       let ms_code = data[i][1];
       let is_sign = data[i][2].trim();
-      let item_name = data[i][3].trim();
       try {
         ms_code = ms_code.trim();
       } catch (err) {
@@ -277,23 +276,23 @@ async function startTask(data, header) {
         try {
             timer(1000);
             let res = {};
-            res = await query_protocol_list(ms_code, res, item_name);
+            res = await query_protocol_list(ms_code, res);
             if (is_sign !== '签章') {
                 await batch_audit_not_pass(res, is_sign);
                 success_num += 1;
-                exportText(`拒绝成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 项目名称: ${item_name}`);
+                exportText(`拒绝成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
                 continue;
             }
             const pdf_bs64 = await download_file(res.fileId);
             const fileEncode = await sign_name(pdf_bs64);
             await update_sign_status(res, fileEncode);
             success_num += 1;
-            exportText(`签章成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 项目名称: ${item_name}`);
+            exportText(`签章成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
         } catch (error) {
-            exportText(`签章失败, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 项目名称: ${item_name}, 错误: ${error.stack}`);
+            exportText(`签章失败, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 错误: ${error.stack}`);
         }
       } else {
-        exportText(`Excel表格中的数据不全, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 项目名称: ${item_name}`);
+        exportText(`Excel表格中的数据不全, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
       }
     }
     exportText(`总数：${total_num}，签章成功：${success_num}，签章失败：${total_num - success_num}`);
