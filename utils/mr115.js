@@ -206,54 +206,57 @@ async function submit_c(res) {
     }
 }
 
-async function startTask(data, header) {
+async function startTask(dataList, header) {
     let total_num = 0;
     let success = 0;
     headers = convertHeadersArrayToObject(header);
     headers['content-type'] = 'application/json;charset=UTF-8';
     try {
-        let i = 0;
-        for (i; i < data.length; i++) {
-            if (data[i][8] && data[i][8].toString().includes('产品ID')) break;
-        }
-        i += 1;
-        for (i; i < data.length; i++) {
-            if (!data[i][8]) continue;
-            total_num += 1;
-            let ms_code = data[i][8];
-            try {
-                ms_code = ms_code.trim();
-            } catch (err) {
-                ms_code = String(parseInt(ms_code)).trim();
+        for (let j = 0; j < dataList.length; j++) {
+            let i = 0;
+            const data = dataList[j];
+            for (i; i < data.length; i++) {
+                if (data[i][8] && data[i][8].replace(/[\r\n]/g, '') === '产品ID(市平台)') break;
             }
-            let company = data[i][2].trim();
-            let is_city = data[i][3].trim();
-            let city = data[i][4].trim();
-            let district = is_city === "地市" ? null : data[i][5].trim();
-            let purchase_type = data[i][7].trim();
-            let distributionType = is_city === '地市' ? 0 : 1;
-            if (ms_code && company && is_city && city && purchase_type) {
+            i += 1;
+            for (i; i < data.length; i++) {
+                if (!data[i][8]) continue;
+                total_num += 1;
+                let ms_code = data[i][8];
                 try {
-                    let res = {"distributionType": distributionType};
-                    res = query_areas(city, district, distributionType, res);
-                    res = await query_code(String(ms_code).trim(), company, purchase_type, res);
-                    if (!res) {
-                        resubmit_num += 1;
-                        continue;
-                    }
-                    
-                    res = await query_company(company, res);
-                    const areas = res['admdvsDtoList'].map(adm => adm['admdvsName']);
-                    await submit_c(res);
-                    success += 1;
-                    exportText(`配送成功, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${areas.join(',')}, 采购来源: ${purchase_type}`);
-                } catch (error) {
-                    const areas = is_city === '地市' ? city : district;
-                    exportText(`配送失败, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${areas}, 采购来源: ${purchase_type}, 错误: ${error.stack}`);
+                    ms_code = ms_code.trim();
+                } catch (err) {
+                    ms_code = String(parseInt(ms_code)).trim();
                 }
-            } else {
-                const areas = is_city === '地市' ? city : district;
-                exportText(`Excel表格中的数据不全, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${areas}, 采购来源: ${purchase_type}`);
+                let company = data[i][2].trim();
+                let is_city = data[i][3].trim();
+                let city = data[i][4].trim();
+                let district = is_city === "地市" ? null : data[i][5].trim();
+                let purchase_type = data[i][7].trim();
+                let distributionType = is_city === '地市' ? 0 : 1;
+                if (ms_code && company && is_city && city && purchase_type) {
+                    try {
+                        let res = {"distributionType": distributionType};
+                        res = query_areas(city, district, distributionType, res);
+                        res = await query_code(String(ms_code).trim(), company, purchase_type, res);
+                        if (!res) {
+                            resubmit_num += 1;
+                            continue;
+                        }
+                        
+                        res = await query_company(company, res);
+                        const areas = res['admdvsDtoList'].map(adm => adm['admdvsName']);
+                        await submit_c(res);
+                        success += 1;
+                        exportText(`配送成功, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${areas.join(',')}, 采购来源: ${purchase_type}`);
+                    } catch (error) {
+                        const areas = is_city === '地市' ? city : district;
+                        exportText(`配送失败, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${areas}, 采购来源: ${purchase_type}, 错误: ${error.stack}`);
+                    }
+                } else {
+                    const areas = is_city === '地市' ? city : district;
+                    exportText(`Excel表格中的数据不全, 产品ID: ${ms_code}, 配送企业: ${company}, 配送地区: ${areas}, 采购来源: ${purchase_type}`);
+                }
             }
         }
         exportText(`总数: ${total_num}, 配送成功: ${success + resubmit_num}, 配送失败: ${total_num - success - resubmit_num}`);

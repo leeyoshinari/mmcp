@@ -1,51 +1,4 @@
-async function fetchPost(url, data, myheader) {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      ...myheader,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Request Error:' + response.status);
-  return await response.json();
-}
-
-async function fetchGet(url, myheader) {
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...myheader,
-    },
-  });
-  if (!response.ok) throw new Error('Request Error:' + response.status);
-  return await response.json();
-}
-
-function createWebSocket(url, protocols) {
-  return new Promise((resolve, reject) => {
-    const ws = new WebSocket(url, protocols);
-    ws.onopen = () => resolve(ws);
-    ws.onerror = (error) => reject(error);
-  });
-}
-
-function timer(millisecond) {
-  let startTime = (new Date()).getTime();
-  while ((new Date()).getTime() - startTime < millisecond) {
-    continue;
-  }
-}
-
-async function calc_md5(str) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
-}
-
-function exportText(text) {
+function exportText1(text) {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -55,33 +8,24 @@ function exportText(text) {
   const seconds = String(now.getSeconds()).padStart(2, '0');
   const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
   text = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds} - ${text}`;
+  const textContainer = document.getElementsByClassName("logs")[0];
   textContainer.textContent += text + '\n';
   textContainer.scrollTop = textContainer.scrollHeight;
   console.log(text);
 }
 
-function arrayBufferToBase64(arrayBuffer) {
-  let binary = '';
-  const bytes = new Uint8Array(arrayBuffer);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return window.btoa(binary);
-}
-
-function convertHeadersArrayToObject(headersArray) {
-  const headersObject = {};
-  headersArray.forEach(header => {
-    if (header.name) {
-      headersObject[header.name.toLowerCase()] = header.value;
-    }
-  });
-  return headersObject;
-}
+// function arrayBufferToBase641(arrayBuffer) {
+//   let binary = '';
+//   const bytes = new Uint8Array(arrayBuffer);
+//   const len = bytes.byteLength;
+//   for (let i = 0; i < len; i++) {
+//     binary += String.fromCharCode(bytes[i]);
+//   }
+//   return window.btoa(binary);
+// }
 
 
-class FileTransferClient {
+class FileTransferClient1 {
   constructor(serverUrl) {
     this.serverUrl = serverUrl;
     this.socket = null;

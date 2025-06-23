@@ -1,4 +1,4 @@
-// 广东省平台合同签章
+// 广州市平台合同签章
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
 const request_origin = "45B45638-A006-4cf1-A298-816B376D867E";
@@ -38,20 +38,8 @@ const pos_data = {
 
 async function query_protocol_list(ms_code, res) {
     try {
-        const url = `${host}/tps_local_bd/web/mcstrans/ttpCntrSummary/prodentp/query_page`;
-        const data = {
-            "cntrStas": "",
-            "current": 1,
-            "medinsCode": "",
-            "itemName": "",
-            "prodName": "",
-            "prodCode": "",
-            "prodType": "2",
-            "size": 10,
-            "tenditmType": "1",
-            "ttpCntrCode": ms_code,
-            "isComb": "0"
-        };
+        const url = `${host}/gpo/tps_local_bd/web/mcsTrade/suppurContractDetail/querySuppurContractDetailSinglePage`;
+        const data = {"current": 1, "size": 10, "searchCount": True, "searchTime": [], "contractId": ms_code, "isCompanySc": True, "isYxt": 0};
         const response = await fetchPost(url, data, headers);
         if (response.code === 0 && response.data && response.data.records.length === 1) {
             res.fileId = response.data.records[0].fileId;
@@ -63,14 +51,14 @@ async function query_protocol_list(ms_code, res) {
             throw new Error(`交易协议列表查询为空, 响应值: ${JSON.stringify(response)}`);
         }
     } catch (error) {
-        exportText(`交易协议列表查询失败, 协议编号: ${ms_code}, 错误: ${error.stack}`);
+        exportText(`交易协议列表查询失败, 合同编号: ${ms_code}, 错误: ${error.stack}`);
         throw error;
     }
 }
 
 async function download_file(file_id) {
     try {
-        const url = `${host}/tps_local_bd/web/mcstrade/comp/file/downBase64?fileId=${file_id}`;
+        const url = `${host}/gpo/tps_local_bd/web/mcsTrade/comp/file/downBase64?fileId=${file_id}`;
         const response = await fetchGet(url, headers);
         if (response.code === 0 && response.data) {
             return response.data;
@@ -109,7 +97,7 @@ async function sign_name(pdf_base64) {
                         "width": 100,
                         "height": 100,
                         "offsetX": 0,
-                        "offsetY": 55
+                        "offsetY": 0
                     },
                     "Tsa": {
                         "tsaUrl": "",
@@ -139,12 +127,12 @@ async function sign_name(pdf_base64) {
 
 async function update_sign_status(res, pdfBase64) {
     try {
-        const url = `${host}/tps_local_bd/web/mcstrans/ttpCntrSummary/update_sign_status`;
+        const url = `${host}/gpo/tps_local_bd/web/mcsTrade/suppurContract/updateContractSignStatus`;
         const data = {
-            "fileId": res.fileId,
-            "orgType": 4,
+            "contractAttachment": res.fileId,
+            "orgType": "4",
             "caType": "1",
-            "cntrId": res.cntrId,
+            "contractId": res.cntrId,
             "pdfBase64": encodeURIComponent(pdfBase64)
         };
         const response = await fetchPost(url, data, headers);
@@ -159,12 +147,8 @@ async function update_sign_status(res, pdfBase64) {
 
 async function batch_audit_not_pass(res, reason_text) {
     try {
-        const url = `${host}/tps_local_bd/web/mcstrans/ttpCntrSummary/batch_audit_not_pass`;
-        const data = {
-            "refusedReason": reason_text,
-            "cntrId": res.cntrId,
-            "orgType": 4
-        };
+        const url = `${host}/gpo/tps_local_bd/web/mcsTrade/suppurContract/updateContractSignStatus2`;
+        const data = {"array": [{"contractId": "H2504281017451"}]};
         const response = await fetchPost(url, data, headers);
         if (response.code !== 0 || !response.success) {
             throw new Error(`签章失败, 响应值: ${JSON.stringify(response)}`);
@@ -261,7 +245,7 @@ async function startTask(dataList, header) {
         let i = 0;
         const data = dataList[j];
         for (i; i < data.length; i++) {
-            if (data[i][1] === '省平台-合同编号') break;
+            if (data[i][1] === '广州市平台-合同编号') break;
         }
         i += 1;
         for (i; i < data.length; i++) {
@@ -282,19 +266,19 @@ async function startTask(dataList, header) {
                     if (is_sign !== '签章') {
                         await batch_audit_not_pass(res, is_sign);
                         success_num += 1;
-                        exportText(`拒绝成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
+                        exportText(`拒绝成功, 合同编号: ${ms_code}, 合同执行: ${is_sign}`);
                         continue;
                     }
                     const pdf_bs64 = await download_file(res.fileId);
                     const fileEncode = await sign_name(pdf_bs64);
                     await update_sign_status(res, fileEncode);
                     success_num += 1;
-                    exportText(`签章成功, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
+                    exportText(`签章成功, 合同编号: ${ms_code}, 合同执行: ${is_sign}`);
                 } catch (error) {
-                    exportText(`签章失败, 协议编号: ${ms_code}, 合同执行: ${is_sign}, 错误: ${error.stack}`);
+                    exportText(`签章失败, 合同编号: ${ms_code}, 合同执行: ${is_sign}, 错误: ${error.stack}`);
                 }
             } else {
-                exportText(`Excel表格中的数据不全, 协议编号: ${ms_code}, 合同执行: ${is_sign}`);
+                exportText(`Excel表格中的数据不全, 合同编号: ${ms_code}, 合同执行: ${is_sign}`);
             }
         }
     }

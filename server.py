@@ -87,24 +87,31 @@ async def handle_connection(websocket):
     try:
         async for message in websocket:
             data = json.loads(message)
-            if data['type'] == 1:
-                fileName = os.path.join(current_path, data['name'])
+            print(message)
+            if data['type'] == 'requestFile':
+                fileName = os.path.join(file_path, data['data'])
+            elif data['type'] == 'requestFileList':
+                file_names = [n for n in os.listdir(current_path) if n.endswith('.xlsx')]
+                await websocket.send(','.join(file_names))
+                continue
+            elif data['type'] == 'requestExcel':
+                fileName = os.path.join(current_path, data['data'])
             else:
-                fileName = os.path.join(file_path, data['name'])
+                fileName = os.path.join(file_path, data['data'])
+
             abs_file_path = os.path.abspath(fileName)
             if not abs_file_path.startswith(current_path):
                 await websocket.send("错误: 未授权的访问")
                 continue
             if not os.path.exists(fileName):
-                await websocket.send(f"错误: 文件 {data['name']} 不存在")
+                await websocket.send(f"错误: 文件 {data['data']} 不存在")
                 continue
 
             try:
                 with open(fileName, "rb") as file:
                     file_content = file.read()
                 file_hash = hashlib.sha256(file_content).hexdigest()
-                file_size = len(file_content)
-                metadata = {"type": "metadata", "size": file_size, "hash": file_hash}
+                metadata = {"type": "metadata", "data": file_hash}
                 await websocket.send(json.dumps(metadata))
 
                 chunk_size = 1024 * 64  # 每次发送 64KB
@@ -112,7 +119,7 @@ async def handle_connection(websocket):
                     chunk = file_content[i:i + chunk_size]
                     await websocket.send(chunk)
                 await websocket.send("FILE_TRANSFER_COMPLETE")
-                print(f"文件 {data['name']} 传输完成")
+                print(f"文件 {data['data']} 传输完成")
             except Exception as e:
                 await websocket.send(f"错误: 无法读取文件 ({str(e)})")
     except websockets.exceptions.ConnectionClosed:

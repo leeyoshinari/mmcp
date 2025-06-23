@@ -22,12 +22,16 @@ window.addEventListener('load', () => {
     myDiv.addEventListener('click', () => {
         clickPage();
         document.getElementById('startTask').addEventListener('click', () => {
-            loadScript(chrome.runtime.getURL('utils/template.js'), function() {
-            let selectVal = document.getElementById("operator-type").value;
-            const hh = document.createElement('script');
-            hh.src = chrome.runtime.getURL(`utils/${'mr' + selectVal}.js`);
-            document.body.appendChild(hh);
-            document.getElementById('startTask').disabled = true;
+            loadScript(chrome.runtime.getURL('utils/template.js'), async () => {
+                if (allData.length < 1) {
+                    exportText1("正在获取Excel文件中 ...")
+                    await fetchExcel();
+                }
+                let selectVal = document.getElementById("operator-type").value;
+                const hh = document.createElement('script');
+                hh.src = chrome.runtime.getURL(`utils/${'mr' + selectVal}.js`);
+                document.body.appendChild(hh);
+                document.getElementById('startTask').disabled = true;
             });
         });
     });
@@ -71,7 +75,7 @@ window.addEventListener('load', () => {
                     }
                 })
                 .catch(error => console.log(error));
-        } // else {document.body.appendChild(myDiv);}
+        } else {document.body.appendChild(myDiv);}
     }
     setTimeout(() => {check_user()}, 3000);
 });

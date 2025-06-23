@@ -223,61 +223,64 @@ async function submit_c(res) {
     }
 }
 
-async function parseExcelData(allData) {
+async function parseExcelData(allDataList) {
     const resDict = {};
-    let ind = 1;
     
-    for (let i = 0; i < allData.length; i++) {
-        if (allData[i][8] && allData[i][8].toString().includes('药交ID')) {
-            break;
-        } else {
-            ind++;
-        }
-    }
-    
-    for (let i = ind; i < allData.length; i++) {
-        if (!allData[i][8]) continue;
-        let msCode;
-        try {
-            msCode = allData[i][8].toString().trim();
-        } catch (e) {
-            msCode = String(parseInt(allData[i][8]));
-        }
-        
-        const company = allData[i][2]?.toString().trim() || '';
-        const orgMd5 = await calc_md5(company);
-        const isCity = allData[i][3]?.toString().trim() || '';
-        const city = allData[i][4]?.toString().trim() || '';
-        const district = isCity === '地市' ? null : (allData[i][5]?.toString().trim() || '');
-        const areaMd5 = await calc_md5(`${city}_${district}`);
-        const tenditmName = allData[i][7]?.toString().trim() || '';
-        
-        if (resDict[orgMd5]) {
-            if (resDict[orgMd5]['v'][areaMd5]) {
-                resDict[orgMd5]['v'][areaMd5]['code'].push(msCode);
-                resDict[orgMd5]['v'][areaMd5]['tenditm_name'].push(tenditmName);
+    for (let j = 0; j < allDataList.length; j++) {
+        const allData = allDataList[j];
+        let ind = 1;
+        for (let i = 0; i < allData.length; i++) {
+            if (allData[i][8] && allData[i][8] === '药交ID') {
+                break;
             } else {
-                resDict[orgMd5]['v'][areaMd5] = {
-                    is_city: isCity,
-                    city: city,
-                    district: district,
-                    code: [msCode],
-                    tenditm_name: [tenditmName]
-                };
+                ind++;
             }
-        } else {
-            resDict[orgMd5] = {
-                k: company,
-                v: {
-                    [areaMd5]: {
+        }
+        
+        for (let i = ind; i < allData.length; i++) {
+            if (!allData[i][8]) continue;
+            let msCode;
+            try {
+                msCode = allData[i][8].toString().trim();
+            } catch (e) {
+                msCode = String(parseInt(allData[i][8]));
+            }
+            
+            const company = allData[i][2]?.toString().trim() || '';
+            const orgMd5 = await calc_md5(company);
+            const isCity = allData[i][3]?.toString().trim() || '';
+            const city = allData[i][4]?.toString().trim() || '';
+            const district = isCity === '地市' ? null : (allData[i][5]?.toString().trim() || '');
+            const areaMd5 = await calc_md5(`${city}_${district}`);
+            const tenditmName = allData[i][7]?.toString().trim() || '';
+            
+            if (resDict[orgMd5]) {
+                if (resDict[orgMd5]['v'][areaMd5]) {
+                    resDict[orgMd5]['v'][areaMd5]['code'].push(msCode);
+                    resDict[orgMd5]['v'][areaMd5]['tenditm_name'].push(tenditmName);
+                } else {
+                    resDict[orgMd5]['v'][areaMd5] = {
                         is_city: isCity,
                         city: city,
                         district: district,
                         code: [msCode],
                         tenditm_name: [tenditmName]
-                    }
+                    };
                 }
-            };
+            } else {
+                resDict[orgMd5] = {
+                    k: company,
+                    v: {
+                        [areaMd5]: {
+                            is_city: isCity,
+                            city: city,
+                            district: district,
+                            code: [msCode],
+                            tenditm_name: [tenditmName]
+                        }
+                    }
+                };
+            }
         }
     }
     return resDict;
@@ -287,6 +290,7 @@ async function startTask(data, header) {
     const send_num = 10;
     let total_num = 0;
     let success = 0;
+    let is_first = 0;
     headers = convertHeadersArrayToObject(header);
     headers['content-type'] = 'application/json;charset=UTF-8';
     try {
@@ -315,6 +319,17 @@ async function startTask(data, header) {
                     
                     if (send_code && send_code.length > 0 && company && is_city && city) {
                         try {
+                            if (is_first > 0) {
+                                let startTime = new Date().getTime() / 1000;
+                                while (True) {
+                                    let endTime = new Date().getTime() / 1000;
+                                    if (endTime - startTime > 130) {
+                                        break;
+                                    } else {
+                                        timer(1000);
+                                    }
+                                }
+                            }
                             let res = { 'distributionType': distributionType };
                             res = query_areas(city, district, distributionType, res);
                             res = await query_code(send_code, company, t_name, res);
@@ -328,6 +343,7 @@ async function startTask(data, header) {
                             
                             await submit_c(res);
                             success += res.drugDtoList.length;
+                            is_first += 1;
                             const send_code_real = res.drugDtoList.map(rr => rr.pubonlnRsltIdYj);
                             exportText(`配送成功, 配送企业: ${company}, 配送地区: ${areas.join(',')}, 药交ID: ${send_code_real.join(',')}`);
                         } catch (error) {
