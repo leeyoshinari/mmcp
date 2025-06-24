@@ -1,6 +1,7 @@
 const actionList = [
   {'label': '广东省平台点配送', 'js': '212', 'url': 'igi.hsa.gd.gov.cn/tps_local_bd', 'province': '广东省'},
   {'label': '广东省平台合同签章', 'js': '111', 'url': 'igi.hsa.gd.gov.cn/tps_local_bd', 'province': '广东省'},
+  {'label': '广东省平台议价', 'js': '213', 'url': 'igi.hsa.gd.gov.cn/tps_local_bd', 'province': '广东省'},
   {'label': '广州市平台点配送', 'js': '115', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
   {'label': '广州市平台合同签章', 'js': '113', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
   {'label': '广州市平台议价', 'js': '112', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},

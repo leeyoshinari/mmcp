@@ -27,10 +27,12 @@ window.addEventListener('load', () => {
                     exportText1("正在获取Excel文件中 ...")
                     await fetchExcel();
                 }
-                let selectVal = document.getElementById("operator-type").value;
-                const hh = document.createElement('script');
-                hh.src = chrome.runtime.getURL(`utils/${'mr' + selectVal}.js`);
-                document.body.appendChild(hh);
+                if (allData.length > 0) {
+                    let selectVal = document.getElementById("operator-type").value;
+                    const hh = document.createElement('script');
+                    hh.src = chrome.runtime.getURL(`utils/${'mr' + selectVal}.js`);
+                    document.body.appendChild(hh);
+                }
                 document.getElementById('startTask').disabled = true;
             });
         });
@@ -61,7 +63,7 @@ window.addEventListener('load', () => {
         let user_url = "";
         let method = "GET";
         if (target_action) {
-            if (['111', '112', '115', '212'].indexOf(target_action.js) > -1) {
+            if (['111', '112', '113', '115', '212', '213'].indexOf(target_action.js) > -1) {
                 h = convertHeadersArrayToObject(headers);
                 user_url = `https://igi.hsa.gd.gov.cn/tps_local/web/auth/user/query_user_info`;
             }
