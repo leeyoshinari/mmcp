@@ -59,25 +59,27 @@ window.addEventListener('load', () => {
 
     function check_user() {
         const target_action = actionList.find(m => m.url.indexOf(window.location.host) > -1);
-        let h = {};
         let user_url = "";
         let method = "GET";
         if (target_action) {
+            let h = convertHeadersArrayToObject(headers)
             if (['111', '112', '113', '115', '212', '213'].indexOf(target_action.js) > -1) {
-                h = convertHeadersArrayToObject(headers);
                 user_url = `https://igi.hsa.gd.gov.cn/tps_local/web/auth/user/query_user_info`;
             }
+            if (['155', '211'].indexOf(target_action.js) > -1) {
+                user_url = `https://yyhc.szggzy.com:9000/hctrade/index.html?id=1629`;
+            }
+            console.log(h);
             fetch(user_url, { method: method, headers: h })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    let s = JSON.stringify(data);
-                    if (s.indexOf('迈瑞') > 1 || s.indexOf('长岛生物') > 1) {
+                .then(response => response.text())
+                .then(text => {
+                    console.log(text);
+                    if (text.indexOf('迈瑞') > 1 || text.indexOf('长岛生物') > 1) {
                         document.body.appendChild(myDiv);
                     }
                 })
                 .catch(error => console.log(error));
-        } else {document.body.appendChild(myDiv);}
+        } // else {document.body.appendChild(myDiv);}
     }
     setTimeout(() => {check_user()}, 3000);
 });

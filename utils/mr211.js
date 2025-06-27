@@ -252,7 +252,7 @@ async function query_submit_list(goods_id, agreement_id, company, hospital) {
   }
 }
 
-async function startTask(data, header) {
+async function startTask(dataList, header) {
   let total_num = 0;
   let success = 0;
   let has_send = 0;
@@ -265,88 +265,90 @@ async function startTask(data, header) {
       throw new Error('无法连接 CA, 请正确插入CA证书');
     }
     await fileClient.connect().catch((err) => {throw err;});
-    let i = 0;
-    for (i; i < data.length; i++) {
-      if (data[i][7] === '交易产品代码') break;
-    }
-    i += 1;
-    for (i; i < data.length; i++) {
-      if (!data[i][7]) continue;
-      total_num += 1;
-      let ms_code = data[i][7];
-      try {
-        ms_code = ms_code.trim();
-      } catch (err) {
-        ms_code = String(parseInt(ms_code)).trim();
+    for (let j = 0; j < dataList.length; j++) {
+      let i = 0;
+      const data = dataList[j];
+      for (i; i < data.length; i++) {
+        if (data[i][7] === '交易产品代码') break;
       }
-      let auth_file = data[i][1].trim();
-      let company = data[i][3].trim();
-      let hospital = data[i][4].trim();
-      let is_jicai = data[i][6].trim();
-      if (ms_code && auth_file && company && hospital && is_jicai) {
+      i += 1;
+      for (i; i < data.length; i++) {
+        if (!data[i][7]) continue;
+        total_num += 1;
+        let ms_code = data[i][7];
         try {
-          let agreementType;
-          switch (is_jicai) {
-            case '议价采购':
-              agreementType = '5';
-              break;
-            case '备选协议（不再新增产品配送关系）':
-              agreementType = '1';
-              break;
-            case '肝功生化试剂联盟集采':
-              agreementType = '23';
-              break;
-            case '肾功心肌酶检测试剂集采':
-              agreementType = '37';
-              break;
-            default:
-              throw new Error('协议类型不正确, 仅支持 议价采购、备选协议（不再新增产品配送关系）、肝功生化试剂联盟集采 和 肾功心肌酶检测试剂集采');
-          }
-            
-          let res = {};
-          company = company.replace(' ', '');
-          const company_md5 = await calc_md5(company + agreementType);
-          if (company_dict[company_md5]) {
-            res.agreementId = company_dict[company_md5];
-          } else {
-            res = await query_company(company, agreementType, res);
-          }
-          res = await query_hospital(hospital, res);
-          res = await query_code(ms_code, agreementType, res.agreementId, res);
-          if (['23', '37'].includes(agreementType)) {
-            const auth_md5 = await calc_md5(auth_file);
-            if (auth_file_url[auth_md5]) {
-              res.authorUrl = auth_file_url[auth_md5];
-            } else {
-              res.authorUrl = await upload_file(auth_file);
-            }
-          } 
-          await submit_c(res);
-          timer(2000);
-            
-          const relation_id = await query_submit_list(ms_code, res.agreementId, company, hospital);
-          if (relation_id) {
-            if ([1, 2, 3, 4, 5, 6].includes(relation_id)) {
-              has_send += 1;
-              if ([1, 2].includes(relation_id)) {
-                exportText(`已经配送过了, 配送关系的状态为: ${['', '已提交待配送方确认', '双方同意'][relation_id]}, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
-              } else {
-                exportText(`配送关系的状态为: ${['待提交', '已提交待配送方确认', '双方同意', '配送方拒绝', '已撤废', '启用待确定', '撤废待确定'][relation_id]}, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
-              }
-              continue;
-            }
-            await submit_finally(relation_id, ms_code);
-            success += 1;
-            exportText(`配送成功, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
-          } else {
-            exportText(`配送关系状态不正确, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
-          }
-        } catch (error) {
-          exportText(`配送失败, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
-          exportText(error.stack);
+          ms_code = ms_code.trim();
+        } catch (err) {
+          ms_code = String(parseInt(ms_code)).trim();
         }
-      } else {
-        exportText(`Excel表格中的数据不全, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
+        let auth_file = data[i][1].trim();
+        let company = data[i][3].trim();
+        let hospital = data[i][4].trim();
+        let is_jicai = data[i][6].trim();
+        if (ms_code && auth_file && company && hospital && is_jicai) {
+          try {
+            let agreementType;
+            switch (is_jicai) {
+              case '议价采购':
+                agreementType = '5';
+                break;
+              case '备选协议（不再新增产品配送关系）':
+                agreementType = '1';
+                break;
+              case '肝功生化试剂联盟集采':
+                agreementType = '23';
+                break;
+              case '肾功心肌酶检测试剂集采':
+                agreementType = '37';
+                break;
+              default:
+                throw new Error('协议类型不正确, 仅支持 议价采购、备选协议（不再新增产品配送关系）、肝功生化试剂联盟集采 和 肾功心肌酶检测试剂集采');
+            }
+              
+            let res = {};
+            company = company.replace(' ', '');
+            const company_md5 = await calc_md5(company + agreementType);
+            if (company_dict[company_md5]) {
+              res.agreementId = company_dict[company_md5];
+            } else {
+              res = await query_company(company, agreementType, res);
+            }
+            res = await query_hospital(hospital, res);
+            res = await query_code(ms_code, agreementType, res.agreementId, res);
+            if (['23', '37'].includes(agreementType)) {
+              const auth_md5 = await calc_md5(auth_file);
+              if (auth_file_url[auth_md5]) {
+                res.authorUrl = auth_file_url[auth_md5];
+              } else {
+                res.authorUrl = await upload_file(auth_file);
+              }
+            } 
+            await submit_c(res);
+            timer(2000);
+              
+            const relation_id = await query_submit_list(ms_code, res.agreementId, company, hospital);
+            if (relation_id) {
+              if ([1, 2, 3, 4, 5, 6].includes(relation_id)) {
+                has_send += 1;
+                if ([1, 2].includes(relation_id)) {
+                  exportText(`已经配送过了, 配送关系的状态为: ${['', '已提交待配送方确认', '双方同意'][relation_id]}, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
+                } else {
+                  exportText(`配送关系的状态为: ${['待提交', '已提交待配送方确认', '双方同意', '配送方拒绝', '已撤废', '启用待确定', '撤废待确定'][relation_id]}, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
+                }
+                continue;
+              }
+              await submit_finally(relation_id, ms_code);
+              success += 1;
+              exportText(`配送成功, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
+            } else {
+              exportText(`配送关系状态不正确, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
+            }
+          } catch (error) {
+            exportText(`配送失败, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}, 错误: ${error.stack}`);
+          }
+        } else {
+          exportText(`Excel表格中的数据不全, 产品代码: ${ms_code}, 配送企业: ${company}, 配送医院: ${hospital}, 协议类型: ${is_jicai}, 授权文件名: ${auth_file}`);
+        }
       }
     }
     exportText(`总数: ${total_num}, 配送成功: ${success}, 配送失败: ${total_num - success - has_send}, 已经配送: ${has_send}`);
