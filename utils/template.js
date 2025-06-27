@@ -1,10 +1,19 @@
 async function fetchPost(url, data, myheader) {
+  const content_type = myheader['content-type'];
+  let body = JSON.stringify(data);
+  if (content_type.startsWith('application/x-www-form-urlencoded')) {
+    const params = new URLSearchParams();
+    Object.entries(data).forEach(([key, value]) => {
+      params.append(key, value === null ? "" : value === undefined ? "" : value);
+    });
+    body = params.toString();
+  }
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       ...myheader,
     },
-    body: JSON.stringify(data),
+    body: body,
   });
   if (!response.ok) throw new Error('Request Error:' + response.status);
   return await response.json();

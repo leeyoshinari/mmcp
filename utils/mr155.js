@@ -1,6 +1,8 @@
 // 深圳市平台议价
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
+const continue_bargain = '继续议价'
+const reject_bargain = '请核对价格是否正确'
 let headers = {};
 
 async function query_bargain(ms_code, hospital) {

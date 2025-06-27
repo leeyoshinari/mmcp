@@ -324,7 +324,6 @@ async function startTask(dataList, header) {
               }
             } 
             await submit_c(res);
-            timer(2000);
               
             const relation_id = await query_submit_list(ms_code, res.agreementId, company, hospital);
             if (relation_id) {
