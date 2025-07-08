@@ -113,7 +113,7 @@ async function startTask(dataList, header) {
         }
         if (ms_code && hospital && is_agree) {
           try {
-            timer(1000);
+            await timer(1000);
             const res = await query_bargain(ms_code, hospital);
             await agree_bargain(is_agree, agree_value, res, continue_bargain, reject_bargain);
             success_num += 1;

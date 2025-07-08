@@ -276,7 +276,7 @@ async function startTask(dataList, header) {
             }
             if (ms_code && is_sign) {
                 try {
-                    timer(1000);
+                    await timer(1000);
                     let res = {};
                     res = await query_protocol_list(ms_code, res);
                     if (is_sign !== '签章') {

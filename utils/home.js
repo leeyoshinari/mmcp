@@ -7,6 +7,7 @@ const actionList = [
   {'label': '广州市平台议价', 'js': '112', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
   {'label': '深圳市平台点配送', 'js': '211', 'url': 'yyhc.szggzy.com:9000', 'province': '深圳市'},
   {'label': '深圳市平台议价', 'js': '155', 'url': 'yyhc.szggzy.com:9000', 'province': '深圳市'},
+  {'label': '点配送', 'js': '300', 'url': '', 'province': '湖南'},
 ]
 const allData = [];
 const currentHost = window.location.host;

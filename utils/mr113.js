@@ -39,7 +39,7 @@ const pos_data = {
 async function query_protocol_list(ms_code, res) {
     try {
         const url = `${host}/gpo/tps_local_bd/web/mcsTrade/suppurContractDetail/querySuppurContractDetailSinglePage`;
-        const data = {"current": 1, "size": 10, "searchCount": True, "searchTime": [], "contractId": ms_code, "isCompanySc": True, "isYxt": 0};
+        const data = {"current": 1, "size": 10, "searchCount": true, "searchTime": [], "contractId": ms_code, "isCompanySc": true, "isYxt": 0};
         const response = await fetchPost(url, data, headers);
         if (response.code === 0 && response.data && response.data.records.length === 1) {
             res.fileId = response.data.records[0].fileId;
@@ -260,7 +260,7 @@ async function startTask(dataList, header) {
             }
             if (ms_code && is_sign) {
                 try {
-                    timer(1000);
+                    await timer(1000);
                     let res = {};
                     res = await query_protocol_list(ms_code, res);
                     if (is_sign !== '签章') {

@@ -69,7 +69,7 @@ async function startTask(dataList, header) {
         }
         if (ms_code && is_agree) {
           try {
-            timer(1000);
+            await timer(1000);
             let res = {};
             if (is_agree === '同意') {
               res = await queryCode(ms_code, res);

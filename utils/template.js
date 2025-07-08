@@ -39,10 +39,7 @@ function createWebSocket(url, protocols) {
 }
 
 function timer(millisecond) {
-  let startTime = (new Date()).getTime();
-  while ((new Date()).getTime() - startTime < millisecond) {
-    continue;
-  }
+    return new Promise(resolve => setTimeout(resolve, millisecond));
 }
 
 async function calc_md5(str) {

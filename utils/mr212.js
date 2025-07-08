@@ -320,15 +320,7 @@ async function startTask(data, header) {
                     if (send_code && send_code.length > 0 && company && is_city && city) {
                         try {
                             if (is_first > 0) {
-                                let startTime = new Date().getTime() / 1000;
-                                while (True) {
-                                    let endTime = new Date().getTime() / 1000;
-                                    if (endTime - startTime > 130) {
-                                        break;
-                                    } else {
-                                        timer(1000);
-                                    }
-                                }
+                                await timer(130000);
                             }
                             let res = { 'distributionType': distributionType };
                             res = query_areas(city, district, distributionType, res);

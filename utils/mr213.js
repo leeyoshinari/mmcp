@@ -88,7 +88,7 @@ async function startTask(dataList, header) {
         }
         if (ms_code && hospital && is_agree) {
           try {
-            timer(1000);
+            await timer(1000);
             let res = {};
             res = await query_code(ms_code, hospital, res);
             await agree_bargain(is_agree, res);
