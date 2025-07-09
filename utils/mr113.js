@@ -42,8 +42,8 @@ async function query_protocol_list(ms_code, res) {
         const data = {"current": 1, "size": 10, "searchCount": true, "searchTime": [], "contractId": ms_code, "isCompanySc": true, "isYxt": 0};
         const response = await fetchPost(url, data, headers);
         if (response.code === 0 && response.data && response.data.records.length === 1) {
-            res.fileId = response.data.records[0].fileId;
-            res.cntrId = response.data.records[0].cntrId;
+            res.fileId = response.data.records[0].contractAttachment;
+            res.cntrId = response.data.records[0].contractId;
             return res;
         } else if (response.code === 0 && response.data.total > 1) {
             throw new Error(`交易协议列表查询到多个, 查询结果: ${JSON.stringify(response.data.records)}`);
@@ -148,7 +148,7 @@ async function update_sign_status(res, pdfBase64) {
 async function batch_audit_not_pass(res, reason_text) {
     try {
         const url = `${host}/gpo/tps_local_bd/web/mcsTrade/suppurContract/updateContractSignStatus2`;
-        const data = {"array": [{"contractId": "H2504281017451"}]};
+        const data = {"array": [{"contractId": res.cntrId}]};
         const response = await fetchPost(url, data, headers);
         if (response.code !== 0 || !response.success) {
             throw new Error(`签章失败, 响应值: ${JSON.stringify(response)}`);
