@@ -42,6 +42,10 @@ function timer(millisecond) {
     return new Promise(resolve => setTimeout(resolve, millisecond));
 }
 
+function getRandomInt() {
+  return Math.round(Math.random() * 10000);
+}
+
 async function calc_md5(str) {
   const encoder = new TextEncoder();
   const data = encoder.encode(str);

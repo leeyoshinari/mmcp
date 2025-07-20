@@ -24,21 +24,6 @@ function clickPage() {
   pages.innerHTML = uploadEle;
   document.body.appendChild(pages);
 
-  // function getCellValue(worksheet, row, col) {
-  //   const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-  //   const cell = worksheet[cellAddress];
-  //   if (worksheet['!merges']) {
-  //     for (const merge of worksheet['!merges']) {
-  //       if (row >= merge.s.r && row <= merge.e.r && 
-  //         col >= merge.s.c && col <= merge.e.c) {
-  //         const mainCellAddress = XLSX.utils.encode_cell(merge.s);
-  //         return worksheet[mainCellAddress]?.v || '';
-  //       }
-  //     }
-  //   }
-  //   return cell?.v || '';
-  // }
-
   const fileInput = document.getElementById('excelUpload');
   document.getElementById('parseExcel').addEventListener('click', () => {
     const singleData = [];

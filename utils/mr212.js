@@ -213,10 +213,16 @@ async function submit_c(res) {
         
         const response = await fetchPost(url, res, headers);
         if (response.code !== 0 || !response.success) {
-            const areas1 = res.admdvsDtoList.map(adm => adm.admdvsName);
-            exportText(`配送提交失败, 药交ID: ${res.drugDtoList[0].pubonlnRsltIdYj}, 配送企业: ${res.delventpname}, 配送地区: ${areas1.join(',')}, 响应值: ${JSON.stringify(response)}`);
-            throw new Error(response.message);
+            if (response.message.indexOf('配送关系正在创建') > 1) {
+                console.log(response.message);
+                return response.success;
+            } else {
+                const areas1 = res.admdvsDtoList.map(adm => adm.admdvsName);
+                exportText(`配送提交失败, 药交ID: ${res.drugDtoList[0].pubonlnRsltIdYj}, 配送企业: ${res.delventpname}, 配送地区: ${areas1.join(',')}, 响应值: ${JSON.stringify(response)}`);
+                throw new Error(response.message);
+            }
         }
+        return response.success;
     } catch (error) {
         const areas1 = res.admdvsDtoList.map(adm => adm.admdvsName);
         throw new Error(`配送提交失败, 药交ID: ${res.drugDtoList[0].pubonlnRsltIdYj}, 配送企业: ${res.delventpname}, 配送地区: ${areas1.join(',')}, 错误: ${error.stack}`);
@@ -290,7 +296,6 @@ async function startTask(data, header) {
     const send_num = 10;
     let total_num = 0;
     let success = 0;
-    let is_first = 0;
     headers = convertHeadersArrayToObject(header);
     headers['content-type'] = 'application/json;charset=UTF-8';
     try {
@@ -319,9 +324,6 @@ async function startTask(data, header) {
                     
                     if (send_code && send_code.length > 0 && company && is_city && city) {
                         try {
-                            if (is_first > 0) {
-                                await timer(130000);
-                            }
                             let res = { 'distributionType': distributionType };
                             res = query_areas(city, district, distributionType, res);
                             res = await query_code(send_code, company, t_name, res);
@@ -333,9 +335,12 @@ async function startTask(data, header) {
                                 continue;
                             }
                             
-                            await submit_c(res);
+                            let isSubmit = await submit_c(res);
+                            while (!isSubmit) {
+                                await timer(getRandomInt());
+                                isSubmit = await submit_c(res);
+                            }
                             success += res.drugDtoList.length;
-                            is_first += 1;
                             const send_code_real = res.drugDtoList.map(rr => rr.pubonlnRsltIdYj);
                             exportText(`配送成功, 配送企业: ${company}, 配送地区: ${areas.join(',')}, 药交ID: ${send_code_real.join(',')}`);
                         } catch (error) {
