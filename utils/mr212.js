@@ -362,9 +362,9 @@ async function startTask(data, header) {
 }
 
 window.myExtensionFuncs = {
-  startTask: (data, headers) => startTask(data, headers)
+  startTask212: (data, headers) => startTask(data, headers)
 };
 window.postMessage(
-  { type: "EXTENSION_READY", funcs: ["startTask"] }, 
+  { type: "EXTENSION_READY", funcs: ["startTask212"] }, 
   "*"
 );

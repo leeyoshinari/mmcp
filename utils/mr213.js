@@ -110,9 +110,9 @@ async function startTask(dataList, header) {
 }
 
 window.myExtensionFuncs = {
-  startTask: (data, headers) => startTask(data, headers)
+  startTask213: (data, headers) => startTask(data, headers)
 };
 window.postMessage(
-  { type: "EXTENSION_READY", funcs: ["startTask"] }, 
+  { type: "EXTENSION_READY", funcs: ["startTask213"] }, 
   "*"
 );

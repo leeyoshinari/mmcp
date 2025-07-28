@@ -8,6 +8,7 @@ const actionList = [
   {'label': '深圳市平台点配送', 'js': '211', 'url': 'yyhc.szggzy.com:9000', 'province': '深圳市'},
   {'label': '深圳市平台议价', 'js': '155', 'url': 'yyhc.szggzy.com:9000', 'province': '深圳市'},
   {'label': '点配送', 'js': '300', 'url': '', 'province': '湖南'},
+  {'label': '点配送', 'js': '190', 'url': 'hbyxjzcg.cn:8015', 'province': '湖北'},
 ]
 const allData = [];
 const currentHost = window.location.host;

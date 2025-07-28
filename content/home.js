@@ -50,9 +50,10 @@ window.addEventListener('load', () => {
 
     window.addEventListener("message", (event) => {
         if (event.data.type === "EXTENSION_READY") {
+            let selectV = document.getElementById("operator-type").value;
             const script = document.createElement("script");
             script.src = chrome.runtime.getURL("utils/caller.js");
-            script.dataset.func = "startTask";
+            script.dataset.func = `startTask${selectV}`;
             script.dataset.args = JSON.stringify([allData, headers]);
             document.body.appendChild(script);
         }
