@@ -87,7 +87,7 @@ async function agree_bargain(agree_val, agree_price, res, c_bargain, r_bargain) 
     }
 }
 
-async function startTask(dataList, header) {
+async function startTask155(dataList, header) {
   let total_num = 0;
   let success_num = 0;
   headers = convertHeadersArrayToObject(header);
@@ -134,7 +134,7 @@ async function startTask(dataList, header) {
 }
 
 window.myExtensionFuncs = {
-  startTask155: (data, headers) => startTask(data, headers)
+  startTask155: (data, headers) => startTask155(data, headers)
 };
 window.postMessage(
   { type: "EXTENSION_READY", funcs: ["startTask155"] }, 

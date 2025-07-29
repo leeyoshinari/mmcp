@@ -159,7 +159,7 @@ async function batch_audit_not_pass(res, reason_text) {
     }
 }
 
-async function startTask(dataList, header) {
+async function startTask113(dataList, header) {
   let total_num = 0;
   let success_num = 0;
   headers = convertHeadersArrayToObject(header);
@@ -290,7 +290,7 @@ async function startTask(dataList, header) {
 }
 
 window.myExtensionFuncs = {
-  startTask113: (data, headers) => startTask(data, headers)
+  startTask113: (data, headers) => startTask113(data, headers)
 };
 window.postMessage(
   { type: "EXTENSION_READY", funcs: ["startTask113"] }, 

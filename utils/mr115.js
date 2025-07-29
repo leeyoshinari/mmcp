@@ -206,7 +206,7 @@ async function submit_c(res) {
     }
 }
 
-async function startTask(dataList, header) {
+async function startTask115(dataList, header) {
     let total_num = 0;
     let success = 0;
     headers = convertHeadersArrayToObject(header);
@@ -267,7 +267,7 @@ async function startTask(dataList, header) {
 }
 
 window.myExtensionFuncs = {
-  startTask115: (data, headers) => startTask(data, headers)
+  startTask115: (data, headers) => startTask115(data, headers)
 };
 window.postMessage(
   { type: "EXTENSION_READY", funcs: ["startTask115"] }, 

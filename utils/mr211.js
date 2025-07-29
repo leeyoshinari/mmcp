@@ -252,7 +252,7 @@ async function query_submit_list(goods_id, agreement_id, company, hospital) {
   }
 }
 
-async function startTask(dataList, header) {
+async function startTask211(dataList, header) {
   let total_num = 0;
   let success = 0;
   let has_send = 0;
@@ -358,7 +358,7 @@ async function startTask(dataList, header) {
 }
 
 window.myExtensionFuncs = {
-  startTask211: (data, headers) => startTask(data, headers)
+  startTask211: (data, headers) => startTask211(data, headers)
 };
 window.postMessage(
   { type: "EXTENSION_READY", funcs: ["startTask211"] }, 

@@ -292,7 +292,7 @@ async function parseExcelData(allDataList) {
     return resDict;
 }
 
-async function startTask(data, header) {
+async function startTask212(data, header) {
     const send_num = 10;
     let total_num = 0;
     let success = 0;
@@ -362,7 +362,7 @@ async function startTask(data, header) {
 }
 
 window.myExtensionFuncs = {
-  startTask212: (data, headers) => startTask(data, headers)
+  startTask212: (data, headers) => startTask212(data, headers)
 };
 window.postMessage(
   { type: "EXTENSION_READY", funcs: ["startTask212"] }, 

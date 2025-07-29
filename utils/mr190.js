@@ -1,4 +1,4 @@
-// 广州市平台议价
+// 湖北省点配送
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
 let headers = {};
@@ -102,7 +102,7 @@ async function sends(res) {
     }
 }
 
-async function startTask(dataList, header) {
+async function startTask190(dataList, header) {
     let total_num = 0;
     let success = 0;
     let has_send = 0;
@@ -173,7 +173,7 @@ async function startTask(dataList, header) {
 }
 
 window.myExtensionFuncs = {
-  startTask190: (data, headers) => startTask(data, headers)
+  startTask190: (data, headers) => startTask190(data, headers)
 };
 window.postMessage(
   { type: "EXTENSION_READY", funcs: ["startTask190"] }, 
