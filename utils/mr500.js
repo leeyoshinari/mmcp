@@ -102,7 +102,7 @@ async function sends(res) {
     }
 }
 
-async function startTask190(dataList, header) {
+async function startTask500(dataList, header) {
     let total_num = 0;
     let success = 0;
     let has_send = 0;
@@ -173,9 +173,9 @@ async function startTask190(dataList, header) {
 }
 
 window.myExtensionFuncs = {
-  startTask190: (data, headers) => startTask190(data, headers)
+  startTask500: (data, headers) => startTask500(data, headers)
 };
 window.postMessage(
-  { type: "EXTENSION_READY", funcs: ["startTask190"] }, 
+  { type: "EXTENSION_READY", funcs: ["startTask500"] }, 
   "*"
 );

@@ -1,14 +1,14 @@
 const actionList = [
-  {'label': '广东省平台点配送', 'js': '212', 'url': 'igi.hsa.gd.gov.cn/tps_local_bd', 'province': '广东省'},
-  {'label': '广东省平台合同签章', 'js': '111', 'url': 'igi.hsa.gd.gov.cn/tps_local_bd', 'province': '广东省'},
-  {'label': '广东省平台议价', 'js': '213', 'url': 'igi.hsa.gd.gov.cn/tps_local_bd', 'province': '广东省'},
-  {'label': '广州市平台点配送', 'js': '115', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
-  {'label': '广州市平台合同签章', 'js': '113', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
-  {'label': '广州市平台议价', 'js': '112', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市'},
-  {'label': '深圳市平台点配送', 'js': '211', 'url': 'yyhc.szggzy.com:9000', 'province': '深圳市'},
-  {'label': '深圳市平台议价', 'js': '155', 'url': 'yyhc.szggzy.com:9000', 'province': '深圳市'},
-  {'label': '点配送', 'js': '300', 'url': '', 'province': '湖南'},
-  {'label': '点配送', 'js': '190', 'url': 'hbyxjzcg.cn:8015', 'province': '湖北'},
+  {'label': '广东省平台点配送', 'js': '212', 'url': 'igi.hsa.gd.gov.cn/tps_local_bd', 'province': '广东省', 'auth': 'https://igi.hsa.gd.gov.cn/tps_local/web/auth/user/query_user_info'},
+  {'label': '广东省平台合同签章', 'js': '111', 'url': 'igi.hsa.gd.gov.cn/tps_local_bd', 'province': '广东省', 'auth': 'https://igi.hsa.gd.gov.cn/tps_local/web/auth/user/query_user_info'},
+  {'label': '广东省平台议价', 'js': '213', 'url': 'igi.hsa.gd.gov.cn/tps_local_bd', 'province': '广东省', 'auth': 'https://igi.hsa.gd.gov.cn/tps_local/web/auth/user/query_user_info'},
+  {'label': '广州市平台点配送', 'js': '115', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市', 'auth': 'https://igi.hsa.gd.gov.cn/tps_local/web/auth/user/query_user_info'},
+  {'label': '广州市平台合同签章', 'js': '113', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市', 'auth': 'https://igi.hsa.gd.gov.cn/tps_local/web/auth/user/query_user_info'},
+  {'label': '广州市平台议价', 'js': '112', 'url': 'igi.hsa.gd.gov.cn/gpo', 'province': '广州市', 'auth': 'https://igi.hsa.gd.gov.cn/tps_local/web/auth/user/query_user_info'},
+  {'label': '深圳市平台点配送', 'js': '211', 'url': 'yyhc.szggzy.com:9000', 'province': '深圳市', 'auth': 'https://yyhc.szggzy.com:9000/hctrade/index.html?id=1629'},
+  {'label': '深圳市平台议价', 'js': '155', 'url': 'yyhc.szggzy.com:9000', 'province': '深圳市', 'auth': 'https://yyhc.szggzy.com:9000/hctrade/index.html?id=1629'},
+  {'label': '点配送', 'js': '300', 'url': '', 'province': '湖南', 'auth': ''},
+  {'label': '点配送', 'js': '500', 'url': 'hbyxjzcg.cn:8015', 'province': '湖北', 'auth': ''},
 ]
 const allData = [];
 const currentHost = window.location.host;

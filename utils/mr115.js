@@ -216,7 +216,7 @@ async function startTask115(dataList, header) {
             let i = 0;
             const data = dataList[j];
             for (i; i < data.length; i++) {
-                if (data[i][8] && data[i][8].replace(/[\r\n]/g, '') === '产品ID(市平台)') break;
+                if (data[i][8] && String(data[i][8]).replace(/[\r\n]/g, '') === '产品ID(市平台)') break;
             }
             i += 1;
             for (i; i < data.length; i++) {

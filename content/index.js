@@ -61,16 +61,10 @@ window.addEventListener('load', () => {
 
     function check_user() {
         const target_action = actionList.find(m => m.url.indexOf(window.location.host) > -1);
-        let user_url = "";
-        let method = "GET";
         if (target_action) {
-            let h = convertHeadersArrayToObject(headers)
-            if (['111', '112', '113', '115', '212', '213'].indexOf(target_action.js) > -1) {
-                user_url = `https://igi.hsa.gd.gov.cn/tps_local/web/auth/user/query_user_info`;
-            }
-            if (['155', '211'].indexOf(target_action.js) > -1) {
-                user_url = `https://yyhc.szggzy.com:9000/hctrade/index.html?id=1629`;
-            }
+            let h = convertHeadersArrayToObject(headers);
+            let method = "GET";
+            let user_url = target_action.auth;
             console.log(h);
             fetch(user_url, { method: method, headers: h })
                 .then(response => response.text())
