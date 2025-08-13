@@ -9,6 +9,7 @@ const actionList = [
   {'label': '深圳市平台议价', 'js': '155', 'url': 'yyhc.szggzy.com:9000', 'province': '深圳市', 'auth': 'https://yyhc.szggzy.com:9000/hctrade/index.html?id=1629'},
   {'label': '点配送', 'js': '300', 'url': '', 'province': '湖南', 'auth': ''},
   {'label': '点配送', 'js': '500', 'url': 'hbyxjzcg.cn:8015', 'province': '湖北', 'auth': ''},
+  {'label': '删除/撤废', 'js': '550', 'url': 'ypnew.hnsggzyjy.henan.gov.cn', 'province': '河南', 'auth': 'https://ypnew.hnsggzyjy.henan.gov.cn/sjtrade/index.html'},
 ]
 const allData = [];
 const currentHost = window.location.host;

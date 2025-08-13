@@ -12,7 +12,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://igi.hsa.gd.gov.cn/*", "*://yyhc.szggzy.com/*", "*://hbyxjzcg.cn/*"],
+      "matches": ["*://igi.hsa.gd.gov.cn/*", "*://yyhc.szggzy.com/*", "*://hbyxjzcg.cn/*", "*://ypnew.hnsggzyjy.henan.gov.cn/*"],
       "css": ["content/index.css"],
       "js": ["content/index.js", "utils/index.js", "utils/xlsx.full.min.js", "content/websocket.js"]
     }
