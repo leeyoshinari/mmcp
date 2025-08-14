@@ -150,6 +150,7 @@ async function startTask550(dataList, header) {
     } catch (err) {
         exportText(`失败，请重试: ${err.stack}`);
     }
+    downloadData(textContainer.textContent);
 }
 
 window.myExtensionFuncs = {

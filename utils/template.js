@@ -70,6 +70,17 @@ function exportText(text) {
   console.log(text);
 }
 
+function downloadData(data) {
+    let blob = new Blob(["\uFEFF" + data], {type: 'text/csv;charset=utf-8;'});
+    let link = document.createElement('a');
+    link.style.display = 'none';
+    link.href = URL.createObjectURL(blob);
+    link.download = 'run.log';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 function arrayBufferToBase64(arrayBuffer) {
   let binary = '';
   const bytes = new Uint8Array(arrayBuffer);
