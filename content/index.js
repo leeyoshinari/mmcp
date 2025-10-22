@@ -23,17 +23,21 @@ window.addEventListener('load', () => {
         clickPage();
         document.getElementById('startTask').addEventListener('click', () => {
             loadScript(chrome.runtime.getURL('utils/template.js'), async () => {
-                if (allData.length < 1) {
-                    exportText1("正在获取Excel文件中 ...")
-                    await fetchExcel();
+                const op_value = document.getElementById("operator-type").value;
+                let op_action = actionList.find(m => m.js === op_value);
+                if (op_action.used === 0) {
+                    if (allData.length < 1) {
+                        exportText1("正在获取Excel文件中 ...")
+                        await fetchExcel();
+                    }
+                    if (allData.length > 0) {
+                        let selectVal = document.getElementById("operator-type").value;
+                        const hh = document.createElement('script');
+                        hh.src = chrome.runtime.getURL(`utils/${'mr' + selectVal}.js`);
+                        document.body.appendChild(hh);
+                    }
+                    console.log(allData);
                 }
-                if (allData.length > 0) {
-                    let selectVal = document.getElementById("operator-type").value;
-                    const hh = document.createElement('script');
-                    hh.src = chrome.runtime.getURL(`utils/${'mr' + selectVal}.js`);
-                    document.body.appendChild(hh);
-                }
-                console.log(allData);
                 document.getElementById('startTask').disabled = true;
             });
         });
@@ -46,6 +50,17 @@ window.addEventListener('load', () => {
             if (header.name) {headersObject[header.name.toLowerCase()] = header.value;}
         });
         return headersObject;
+    }
+
+    function convertCookiesToObject(cookieString) {
+        const cookies = {};
+        cookieString.split('; ').forEach(cookie => {
+            const parts = cookie.split('=');
+            const name = decodeURIComponent(parts.shift());
+            const value = decodeURIComponent(parts.join('='));
+            cookies[name] = value;
+        });
+        return cookies;
     }
 
     window.addEventListener("message", (event) => {
@@ -66,6 +81,16 @@ window.addEventListener('load', () => {
             let method = "GET";
             let user_url = target_action.auth;
             console.log(h);
+            if (target_action.header) {
+                cookie_dict = convertCookiesToObject(document.cookie);
+                for (let key in target_action.header) {
+                    if (key in cookie_dict) {
+                        h[target_action.header[key]] = cookie_dict[key];
+                    } else {
+                        h[key] = target_action.header[key];
+                    }
+                }
+            }
             fetch(user_url, { method: method, headers: h })
                 .then(response => response.text())
                 .then(text => {
