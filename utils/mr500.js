@@ -33,7 +33,7 @@ async function step1(area, batch, res) {
                 throw new Error(`配送方案点选列表未找到数据，配送地区：${area}，所属项目：${batch}，响应值：${JSON.stringify(response)}`);
             }
         } else {
-            throw new Error(`配送方案点选列表查询失败，配送地区：${area}，动态批次：${batch}，响应值：${JSON.stringify(response)}`);
+            throw new Error(`配送方案点选列表查询失败，配送地区：${area}，所属项目：${batch}，响应值：${JSON.stringify(response)}`);
         }
     } catch (error) {
         throw error;
@@ -75,10 +75,10 @@ async function query_company(res, type = 0) {
             throw new Error(`${type === 0 ? '可选' : '已选'}配送企业列表中查询到多个企业，配送企业：${res.delvEntpName}，查询结果：${JSON.stringify(response)}`);
         } else {
             if (type === 0) {
-                exportText(`可选配送企业列表中找不到企业，即将去已选配送企业中查找，配送企业：${res.delvEntpName}，动态批次：${res.tenditmName}，配送地区：${res.admdvsName}`);
+                exportText(`可选配送企业列表中找不到企业，即将去已选配送企业中查找，配送企业：${res.delvEntpName}，所属项目：${res.tenditmName}，配送地区：${res.admdvsName}`);
                 return res;
             } else {
-                throw new Error(`已选配送企业列表中找不到企业，配送企业：${res.delvEntpName}，动态批次：${res.tenditmName}，配送地区：${res.admdvsName}`);
+                throw new Error(`已选配送企业列表中找不到企业，配送企业：${res.delvEntpName}，所属项目：${res.tenditmName}，配送地区：${res.admdvsName}`);
             }
         }
     } catch (error) {
@@ -192,10 +192,10 @@ async function query_code(res, type = 1) {
                     res.pubonlnRsltId = response.data.records[0].pubonlnRsltId;
                     return res;
                 } else {
-                    throw new Error(`${type === 0 ? '可' : '已'}添加注册证查询结果为空，注册证号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+                    throw new Error(`${type === 0 ? '可' : '已'}添加注册证查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
                 }
             } else {
-                throw new Error(`${type === 0 ? '可' : '已'}添加注册证查询结果为空，注册证号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+                throw new Error(`${type === 0 ? '可' : '已'}添加注册证查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
             }
         }
     } catch (error) {
@@ -237,10 +237,10 @@ async function query_code_bak(res, type = 1) {
                     res.pubonlnRsltId = response.data.records[0].pubonlnRsltId;
                     return res;
                 } else {
-                    throw new Error(`配送签约调整：${type === 0 ? '可' : '已'}添加注册证查询结果为空，注册证号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+                    throw new Error(`配送签约调整：${type === 0 ? '可' : '已'}添加注册证查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
                 }
             } else {
-                throw new Error(`配送签约调整：${type === 0 ? '可' : '已'}添加注册证查询结果为空，注册证号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+                throw new Error(`配送签约调整：${type === 0 ? '可' : '已'}添加注册证查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
             }
         }
     } catch (error) {
@@ -272,7 +272,7 @@ async function add_code(res, type = 1) {
         const response = await fetchPost(url, data, headers);
         
         if (!response.success) {
-            throw new Error(`${type === 0 ? '添加' : '取消'}注册证失败，注册证号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+            throw new Error(`${type === 0 ? '添加' : '取消'}注册证失败，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
         }
     } catch (error) {
         throw error;
@@ -294,7 +294,7 @@ async function add_code_bak(res, type = 1) {
         const response = await fetchPost(url, data, headers);
         
         if (!response.success) {
-            throw new Error(`配送签约调整：${type === 0 ? '添加' : '删除'}注册证失败，注册证号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+            throw new Error(`配送签约调整：${type === 0 ? '添加' : '删除'}注册证失败，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
         }
     } catch (error) {
         throw error;
@@ -313,7 +313,7 @@ async function submit_company(res) {
         const response = await fetchPost(url, data, headers);
         
         if (!response.success) {
-            throw new Error(`提交配送企业失败，配送企业：${res.delvEntpName}，动态批次：${res.tenditmName}，响应值：${JSON.stringify(response)}`);
+            throw new Error(`提交配送企业失败，配送企业：${res.delvEntpName}，所属项目：${res.tenditmName}，响应值：${JSON.stringify(response)}`);
         }
     } catch (error) {
         throw error;
@@ -342,7 +342,7 @@ async function submit_company_bak(res) {
         const response = await fetchPost(url, data, headers);
         
         if (!response.success) {
-            throw new Error(`配送签约调整：提交审核失败，配送企业：${res.delvEntpName}，动态批次：${res.tenditmName}，响应值：${JSON.stringify(response)}`);
+            throw new Error(`配送签约调整：提交审核失败，配送企业：${res.delvEntpName}，所属项目：${res.tenditmName}，响应值：${JSON.stringify(response)}`);
         }
     } catch (error) {
         throw error;
@@ -371,10 +371,11 @@ async function parse_excel(dataList) {
                 const org_name_md5 = calc_md5(org_name);
                 const orders = data[i][1] ? String(data[i][1]).trim() : '';
                 const order_md5 = calc_md5(orders);
-                const mcs_code = data[i][3] ? String(data[i][3]).trim() : '';
+                const zu_code = data[i][3] ? String(data[i][3]).trim() : '';
                 const area = data[i][0] ? data[i][0].trim() : '';
                 const area_md5 = calc_md5(area);
                 if(!org_name && !orders && !area && !mcs_code) continue;
+                const mcs_code = zu_code.padStart(8, '0');
                 
                 total_num += 1;
                 if (res_dict[org_name_md5]) {
@@ -451,7 +452,7 @@ async function startTask500(dataList, header) {
                         
                         if (res.submitStatus !== '0' && res.submitStatus !== '2') {
                             summary.push({ type: 0, c: org_name, b: batch, a: area });
-                            exportText(`当前配送方案的状态不可进行配送方案点选或配送签约调整，请手动检查确认。配送企业：${org_name}，动态批次：${batch}，配送地区：${area}`);
+                            exportText(`当前配送方案的状态不可进行配送方案点选或配送签约调整，请手动检查确认。配送企业：${org_name}，所属项目：${batch}，配送地区：${area}`);
                             continue;
                         }
                         
@@ -459,7 +460,7 @@ async function startTask500(dataList, header) {
                             exportText(`${org_name} - ${batch} - ${area} 已经提交过，现在开始配送签约调整...`);
                             res = await query_company_bak(res);
                             if (res.cntrChangeStas === "12") {
-                                exportText(`配送关系待确认：配送企业：${org_name}，动态批次：${batch}，配送地区：${area}`);
+                                exportText(`配送关系待确认：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}`);
                                 summary.push({ type: 6, c: org_name, b: batch, a: area });
                                 continue;
                             }
@@ -474,25 +475,25 @@ async function startTask500(dataList, header) {
                                 
                                 if (res.submitStatus === '0') {
                                     if ((await query_code(res, 1)) > 0) {
-                                        exportText(`配送方案点选：已经添加过注册证了：配送企业：${org_name}，动态批次：${batch}，配送地区：${area}，注册证号：${res.mcsRegno}`);
+                                        exportText(`配送方案点选：已经添加过注册证了：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
                                         if ("pubonlnRsltId" in res) delete res.pubonlnRsltId;
                                         continue;
                                     }
                                     
                                     res = await query_code(res, 0);
                                     await add_code(res, 0);
-                                    exportText(`配送方案点选：${del_str}添加注册证成功：配送企业：${org_name}，动态批次：${batch}，配送地区：${area}，注册证号：${res.mcsRegno}`);
+                                    exportText(`配送方案点选：${del_str}添加注册证成功：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
                                 } else {
                                     res = await query_code_bak(res, 1);
                                     if ("pubonlnRsltId" in res) {
-                                        exportText(`配送签约调整：已经添加过注册证了：配送企业：${org_name}，动态批次：${batch}，配送地区：${area}，注册证号：${res.mcsRegno}`);
+                                        exportText(`配送签约调整：已经添加过注册证了：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
                                         delete res.pubonlnRsltId;
                                         continue;
                                     }
                                     
                                     res = await query_code_bak(res, 0);
                                     await add_code_bak(res, 0);
-                                    exportText(`配送签约调整：${del_str}添加注册证成功：配送企业：${org_name}，动态批次：${batch}，配送地区：${area}，注册证号：${res.mcsRegno}`);
+                                    exportText(`配送签约调整：${del_str}添加注册证成功：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
                                 }
                                 
                                 success += 1;
@@ -502,10 +503,10 @@ async function startTask500(dataList, header) {
                             } catch (error) {
                                 if (res.submitStatus === '0') {
                                     summary.push({ type: 1, c: org_name, b: batch, a: area, z: mcs_code });
-                                    exportText(`配送方案点选：添加注册证失败：配送企业：${org_name}，动态批次：${batch}，配送地区：${area}，注册证号：${mcs_code}, 错误: ${error.stack}`);
+                                    exportText(`配送方案点选：添加注册证失败：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${mcs_code}, 错误: ${error.stack}`);
                                 } else {
                                     summary.push({ type: 2, c: org_name, b: batch, a: area, z: mcs_code });
-                                    exportText(`配送签约调整：添加注册证失败：配送企业：${org_name}，动态批次：${batch}，配送地区：${area}，注册证号：${mcs_code}, 错误: ${error.stack}`);
+                                    exportText(`配送签约调整：添加注册证失败：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${mcs_code}, 错误: ${error.stack}`);
                                 }
                             }
                         }
@@ -514,24 +515,24 @@ async function startTask500(dataList, header) {
                             try {
                                 await submit_company(res);
                                 success_result.push(`配送方案点选,${org_name},${batch},${area},${i3},${s3},${i3 - s3}`);
-                                exportText(`配送方案点选：提交成功，${org_name} - ${batch} - ${area}，总共配送 ${i3} 个注册证号，成功 ${s3} 个，失败 ${i3 - s3} 个`);
+                                exportText(`配送方案点选：提交成功，${org_name} - ${batch} - ${area}，总共配送 ${i3} 个组件编号，成功 ${s3} 个，失败 ${i3 - s3} 个`);
                             } catch (error) {
                                 summary.push({ type: 3, c: org_name, b: batch, a: area });
-                                exportText(`配送方案点选：提交失败，配送企业：${org_name}，动态批次：${batch}，配送地区：${area}, 错误: ${error.stack}`);
+                                exportText(`配送方案点选：提交失败，配送企业：${org_name}，所属项目：${batch}，配送地区：${area}, 错误: ${error.stack}`);
                             }
                         } else {
                             try {
                                 await submit_company_bak(res);
                                 success_result.push(`配送签约调整,${org_name},${batch},${area},${i3},${s3},${i3 - s3}`);
-                                exportText(`配送签约调整：提交审核成功，${org_name} - ${batch} - ${area}，总共配送 ${i3} 个注册证号，成功 ${s3} 个，失败 ${i3 - s3} 个`);
+                                exportText(`配送签约调整：提交审核成功，${org_name} - ${batch} - ${area}，总共配送 ${i3} 个组件编号，成功 ${s3} 个，失败 ${i3 - s3} 个`);
                             } catch (error) {
                                 summary.push({ type: 4, c: org_name, b: batch, a: area });
-                                exportText(`配送签约调整：提交审核失败，配送企业：${org_name}，动态批次：${batch}，配送地区：${area}, 错误: ${error.stack}`);
+                                exportText(`配送签约调整：提交审核失败，配送企业：${org_name}，所属项目：${batch}，配送地区：${area}, 错误: ${error.stack}`);
                             }
                         }
                     } catch (error) {
                         summary.push({ type: 5, c: org_name, b: batch, a: area });
-                        exportText(`在配送企业列表中找不到企业：配送企业：${org_name}，动态批次：${batch}，配送地区：${area}, 错误: ${error.stack}`);
+                        exportText(`在配送企业列表中找不到企业：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}, 错误: ${error.stack}`);
                     }
                 }
             }
@@ -544,30 +545,30 @@ async function startTask500(dataList, header) {
             
             for (const c of summary) {
                 if (c.type === 0) {
-                    exportText(`当前配送方案的状态不可进行配送方案点选或配送签约调整，请手动检查确认。配送企业：${c.c}，动态批次：${c.b}，配送地区：${c.a}`);
+                    exportText(`当前配送方案的状态不可进行配送方案点选或配送签约调整，请手动检查确认。配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}`);
                 }
                 if (c.type === 1) {
-                    exportText(`配送方案点选：添加注册证失败：配送企业：${c.c}，动态批次：${c.b}，配送地区：${c.a}，注册证号：${c.z}`);
+                    exportText(`配送方案点选：添加注册证失败：配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}，组件编号：${c.z}`);
                 }
                 if (c.type === 2) {
-                    exportText(`配送签约调整：添加注册证失败：配送企业：${c.c}，动态批次：${c.b}，配送地区：${c.a}，注册证号：${c.z}`);
+                    exportText(`配送签约调整：添加注册证失败：配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}，组件编号：${c.z}`);
                 }
                 if (c.type === 3) {
-                    exportText(`配送方案点选：提交失败，配送企业：${c.c}，动态批次：${c.b}，配送地区：${c.a}`);
+                    exportText(`配送方案点选：提交失败，配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}`);
                 }
                 if (c.type === 4) {
-                    exportText(`配送签约调整：提交审核失败，配送企业：${c.c}，动态批次：${c.b}，配送地区：${c.a}`);
+                    exportText(`配送签约调整：提交审核失败，配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}`);
                 }
                 if (c.type === 5) {
-                    exportText(`在配送企业列表中找不到企业：配送企业：${c.c}，动态批次：${c.b}，配送地区：${c.a}`);
+                    exportText(`在配送企业列表中找不到企业：配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}`);
                 }
                 if (c.type === 6) {
-                    exportText(`配送关系待确认：配送企业：${c.c}，动态批次：${c.b}，配送地区：${c.a}`);
+                    exportText(`配送关系待确认：配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}`);
                 }
             }
             exportText("-".repeat(69));
         }
-        exportText(`总共配送 ${total_num} 个注册证号，其中成功 ${success} 个，失败 ${total_num - success} 个`);
+        exportText(`总共配送 ${total_num} 个组件编号，其中成功 ${success} 个，失败 ${total_num - success} 个`);
     } catch (error) {
         exportText(`失败，请重试: ${error.stack}`);
     }

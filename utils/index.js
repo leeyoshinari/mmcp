@@ -6,7 +6,7 @@ const currentHost = window.location.host;
 function clickPage() {
   let options = '';
   actionList.forEach((item) => {if (item.url.indexOf(currentHost) > -1) options += `<option value=${item.js}>${item.label}</option>`;});
-  const uploadEle = `<div class="filter"><div style="display: flex;"><label>操作类型:</label><select id="operator-type">${options}</select></div>
+  const uploadEle = `<div class="filter"><div style="display: flex;"><label>操作类型:</label><select id="operatorType">${options}</select></div>
   <div><input type="file" id="excelUpload" accept=".xlsx, .xls, .csv" style="display: none;" /><input id="fileName" type="text" disabled placeholder="请先选择Excel文件" /></div>
   <div style="display:flex;justify-content:space-around;"><button id="parseExcel">选择 Excel</button><button id="startTask">开始执行</button></div></div><div class="logs"></div>`;
   const pages = document.createElement("div");
@@ -108,17 +108,5 @@ async function fetchExcel() {
   } catch (error) {
     exportText1(`Excel 解析失败: ${error.stack}`);
     alert('解析失败，请检查文件格式！');
-  }
-}
-
-function change_options() {
-  const selected_value = document.getElementById("operator-type").value;
-  const target_action = actionList.find(m => m.js === selected_value);
-  if (target_action.used === 0) {
-    document.getElementById('fileName').style.display = '';
-    document.getElementById('parseExcel').style.display = '';
-  } else if (target_action.used === 1) {
-    document.getElementById('fileName').style.display = 'none';
-    document.getElementById('parseExcel').style.display = 'none';
   }
 }
