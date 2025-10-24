@@ -192,10 +192,10 @@ async function query_code(res, type = 1) {
                     res.pubonlnRsltId = response.data.records[0].pubonlnRsltId;
                     return res;
                 } else {
-                    throw new Error(`${type === 0 ? '可' : '已'}添加注册证查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+                    throw new Error(`${type === 0 ? '可' : '已'}添加组件编号查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
                 }
             } else {
-                throw new Error(`${type === 0 ? '可' : '已'}添加注册证查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+                throw new Error(`${type === 0 ? '可' : '已'}添加组件编号查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
             }
         }
     } catch (error) {
@@ -237,10 +237,10 @@ async function query_code_bak(res, type = 1) {
                     res.pubonlnRsltId = response.data.records[0].pubonlnRsltId;
                     return res;
                 } else {
-                    throw new Error(`配送签约调整：${type === 0 ? '可' : '已'}添加注册证查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+                    throw new Error(`配送签约调整：${type === 0 ? '可' : '已'}添加组件编号查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
                 }
             } else {
-                throw new Error(`配送签约调整：${type === 0 ? '可' : '已'}添加注册证查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+                throw new Error(`配送签约调整：${type === 0 ? '可' : '已'}添加组件编号查询结果为空，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
             }
         }
     } catch (error) {
@@ -272,7 +272,7 @@ async function add_code(res, type = 1) {
         const response = await fetchPost(url, data, headers);
         
         if (!response.success) {
-            throw new Error(`${type === 0 ? '添加' : '取消'}注册证失败，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+            throw new Error(`${type === 0 ? '添加' : '取消'}组件编号失败，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
         }
     } catch (error) {
         throw error;
@@ -294,7 +294,7 @@ async function add_code_bak(res, type = 1) {
         const response = await fetchPost(url, data, headers);
         
         if (!response.success) {
-            throw new Error(`配送签约调整：${type === 0 ? '添加' : '删除'}注册证失败，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
+            throw new Error(`配送签约调整：${type === 0 ? '添加' : '删除'}组件编号失败，组件编号：${res.mcsRegno}，响应值：${JSON.stringify(response)}`);
         }
     } catch (error) {
         throw error;
@@ -471,25 +471,25 @@ async function startTask500(dataList, header) {
                                 
                                 if (res.submitStatus === '0') {
                                     if ((await query_code(res, 1)) > 0) {
-                                        exportText(`配送方案点选：已经添加过注册证了：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
+                                        exportText(`配送方案点选：已经添加过组件编号了：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
                                         if ("pubonlnRsltId" in res) delete res.pubonlnRsltId;
                                         continue;
                                     }
                                     
                                     res = await query_code(res, 0);
                                     await add_code(res, 0);
-                                    exportText(`配送方案点选：${del_str}添加注册证成功：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
+                                    exportText(`配送方案点选：${del_str}添加组件编号成功：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
                                 } else {
                                     res = await query_code_bak(res, 1);
                                     if ("pubonlnRsltId" in res) {
-                                        exportText(`配送签约调整：已经添加过注册证了：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
+                                        exportText(`配送签约调整：已经添加过组件编号了：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
                                         delete res.pubonlnRsltId;
                                         continue;
                                     }
                                     
                                     res = await query_code_bak(res, 0);
                                     await add_code_bak(res, 0);
-                                    exportText(`配送签约调整：${del_str}添加注册证成功：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
+                                    exportText(`配送签约调整：${del_str}添加组件编号成功：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${res.mcsRegno}`);
                                 }
                                 
                                 success += 1;
@@ -499,10 +499,10 @@ async function startTask500(dataList, header) {
                             } catch (error) {
                                 if (res.submitStatus === '0') {
                                     summary.push({ type: 1, c: org_name, b: batch, a: area, z: mcs_code });
-                                    exportText(`配送方案点选：添加注册证失败：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${mcs_code}, 错误: ${error.stack}`);
+                                    exportText(`配送方案点选：添加组件编号失败：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${mcs_code}, 错误: ${error.stack}`);
                                 } else {
                                     summary.push({ type: 2, c: org_name, b: batch, a: area, z: mcs_code });
-                                    exportText(`配送签约调整：添加注册证失败：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${mcs_code}, 错误: ${error.stack}`);
+                                    exportText(`配送签约调整：添加组件编号失败：配送企业：${org_name}，所属项目：${batch}，配送地区：${area}，组件编号：${mcs_code}, 错误: ${error.stack}`);
                                 }
                             }
                         }
@@ -544,10 +544,10 @@ async function startTask500(dataList, header) {
                     exportText(`当前配送方案的状态不可进行配送方案点选或配送签约调整，请手动检查确认。配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}`);
                 }
                 if (c.type === 1) {
-                    exportText(`配送方案点选：添加注册证失败：配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}，组件编号：${c.z}`);
+                    exportText(`配送方案点选：添加组件编号失败：配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}，组件编号：${c.z}`);
                 }
                 if (c.type === 2) {
-                    exportText(`配送签约调整：添加注册证失败：配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}，组件编号：${c.z}`);
+                    exportText(`配送签约调整：添加组件编号失败：配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}，组件编号：${c.z}`);
                 }
                 if (c.type === 3) {
                     exportText(`配送方案点选：提交失败，配送企业：${c.c}，所属项目：${c.b}，配送地区：${c.a}`);
