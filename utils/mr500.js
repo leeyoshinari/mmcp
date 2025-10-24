@@ -349,10 +349,6 @@ async function submit_company_bak(res) {
     }
 }
 
-function calc_md5(data) {
-    return crypto.createHash('md5').update(data).digest('hex');
-}
-
 async function parse_excel(dataList) {
     try {
         const res_dict = {};
@@ -361,26 +357,26 @@ async function parse_excel(dataList) {
             let i = 0;
             const data = dataList[j];
             for (i; i < data.length; i++) {
-                if (data[i][0] === '配送区域' && data[i][0] === '所属项目') break;
+                if (data[i][0] === '配送区域' && data[i][1] === '所属项目') break;
             }
             i += 1;
             for (i; i < data.length; i++) {
                 if (!data[i][3]) continue;
                 
                 const org_name = data[i][2] ? data[i][2].trim() : '';
-                const org_name_md5 = calc_md5(org_name);
+                const org_name_md5 = await calc_md5(org_name);
                 const orders = data[i][1] ? String(data[i][1]).trim() : '';
-                const order_md5 = calc_md5(orders);
+                const order_md5 = await calc_md5(orders);
                 const zu_code = data[i][3] ? String(data[i][3]).trim() : '';
                 const area = data[i][0] ? data[i][0].trim() : '';
-                const area_md5 = calc_md5(area);
-                if(!org_name && !orders && !area && !mcs_code) continue;
+                const area_md5 = await calc_md5(area);
+                if(!org_name && !orders && !area && !zu_code) continue;
                 const mcs_code = zu_code.padStart(8, '0');
                 
                 total_num += 1;
-                if (res_dict[org_name_md5]) {
-                    if (res_dict[org_name_md5].v[order_md5]) {
-                        if (res_dict[org_name_md5].v[order_md5].v[area_md5]) {
+                if (org_name_md5 in res_dict) {
+                    if (order_md5 in res_dict[org_name_md5].v) {
+                        if (area_md5 in res_dict[org_name_md5].v[order_md5].v) {
                             res_dict[org_name_md5].v[order_md5].v[area_md5].v.push(mcs_code);
                         } else {
                             res_dict[org_name_md5].v[order_md5].v[area_md5] = { k: area, v: [mcs_code] };
@@ -418,7 +414,7 @@ async function startTask500(dataList, header) {
     headers = convertHeadersArrayToObject(header);
     headers['content-type'] = 'application/json;charset=UTF-8';
     try {
-        const { excel_data, total_num } = await parse_excel(dataList);
+        const { res_dict: excel_data, total_num } = await parse_excel(dataList);
         let success = 0;
         const summary = [];
         const success_result = [];
@@ -428,10 +424,10 @@ async function startTask500(dataList, header) {
             for (const [_, v2] of Object.entries(v1.v)) {
                 const batch = v2.k;
                 for (const [_, v3] of Object.entries(v2.v)) {
+                    const area = v3.k;
                     try {
                         let i3 = 0;
                         let s3 = 0;
-                        const area = v3.k;
                         let res = {
                             admdvsName: area,
                             delvEntpName: org_name,
