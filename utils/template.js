@@ -19,6 +19,27 @@ async function fetchPost(url, data, myheader) {
   return await response.json();
 }
 
+async function fetchPostText(url, data, myheader) {
+  const content_type = myheader['content-type'];
+  let body = JSON.stringify(data);
+  if (content_type.startsWith('application/x-www-form-urlencoded')) {
+    const params = new URLSearchParams();
+    Object.entries(data).forEach(([key, value]) => {
+      params.append(key, value === null ? "" : value === undefined ? "" : value);
+    });
+    body = params.toString();
+  }
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      ...myheader,
+    },
+    body: body,
+  });
+  if (!response.ok) throw new Error('Request Error:' + response.status);
+  return await response.text();
+}
+
 async function fetchGet(url, myheader) {
   const response = await fetch(url, {
     method: 'GET',
@@ -28,6 +49,17 @@ async function fetchGet(url, myheader) {
   });
   if (!response.ok) throw new Error('Request Error:' + response.status);
   return await response.json();
+}
+
+async function fetchGetHtml(url, myheader) {
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      ...myheader,
+    },
+  });
+  if (!response.ok) throw new Error('Request Error:' + response.status);
+  return await response.text();
 }
 
 function createWebSocket(url, protocols) {

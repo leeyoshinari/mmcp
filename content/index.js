@@ -21,9 +21,20 @@ window.addEventListener('load', () => {
     myDiv.style.top = window.innerHeight - 200 + 'px';
     myDiv.addEventListener('click', () => {
         clickPage();
+        document.getElementById('operatorType').addEventListener('change', () => {
+            const selected_value = document.getElementById("operatorType").value;
+            const target_act = actionList.find(m => m.js === selected_value);
+            if (target_act.used === 0) {
+                document.getElementById('fileName').style.display = '';
+                document.getElementById('parseExcel').style.display = '';
+            } else if (target_act.used === 1) {
+                document.getElementById('fileName').style.display = 'none';
+                document.getElementById('parseExcel').style.display = 'none';
+            }
+        });
         document.getElementById('startTask').addEventListener('click', () => {
             loadScript(chrome.runtime.getURL('utils/template.js'), async () => {
-                const op_value = document.getElementById("operator-type").value;
+                const op_value = document.getElementById("operatorType").value;
                 let op_action = actionList.find(m => m.js === op_value);
                 if (op_action.used === 0) {
                     if (allData.length < 1) {
@@ -31,12 +42,15 @@ window.addEventListener('load', () => {
                         await fetchExcel();
                     }
                     if (allData.length > 0) {
-                        let selectVal = document.getElementById("operator-type").value;
                         const hh = document.createElement('script');
-                        hh.src = chrome.runtime.getURL(`utils/${'mr' + selectVal}.js`);
+                        hh.src = chrome.runtime.getURL(`utils/${'mr' + op_value}.js`);
                         document.body.appendChild(hh);
                     }
                     console.log(allData);
+                } else {
+                    const hh = document.createElement('script');
+                    hh.src = chrome.runtime.getURL(`utils/${'mr' + op_value}.js`);
+                    document.body.appendChild(hh);
                 }
                 document.getElementById('startTask').disabled = true;
             });
@@ -65,7 +79,7 @@ window.addEventListener('load', () => {
 
     window.addEventListener("message", (event) => {
         if (event.data.type === "EXTENSION_READY") {
-            let selectV = document.getElementById("operator-type").value;
+            let selectV = document.getElementById("operatorType").value;
             const script = document.createElement("script");
             script.src = chrome.runtime.getURL("utils/caller.js");
             script.dataset.func = `startTask${selectV}`;
@@ -101,7 +115,7 @@ window.addEventListener('load', () => {
                 })
                 .catch(error => console.log(error));
         }
-        // document.body.appendChild(myDiv);
+        document.body.appendChild(myDiv);
     }
     setTimeout(() => {check_user()}, 3000);
 });
