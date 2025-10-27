@@ -115,7 +115,7 @@ window.addEventListener('load', () => {
                 })
                 .catch(error => console.log(error));
         }
-        document.body.appendChild(myDiv);
+        // document.body.appendChild(myDiv);
     }
     setTimeout(() => {check_user()}, 3000);
 });

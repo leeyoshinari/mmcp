@@ -32,18 +32,20 @@ const endTime = time_between_ele.getElementsByTagName("input")[1].value;
 async function query_list(page) {
   try {
     const url = `${host}/tps-local/ucenter/yjs-ecps-start/listOrder/query.htm`;
-    const data = [{"description": "创建时间",
-        "fieldName": "CREATED",
-        "fieldTypeId": "DATE",
-        "sqlSelect": "CREATED",
-        "otherSearchField": "", 
-        "isAutocomplete": "0", 
-        "enumSearchType": "between", 
-        "value1": startTime, 
-        "value2": endTime
-    }];
-
-    const queryParams = btoa(encodeURIComponent(JSON.stringify(data)));
+    let queryParams = "JTVCJTVE";
+    if (startTime && endTime) {
+      const data = [{"description": "创建时间",
+          "fieldName": "CREATED",
+          "fieldTypeId": "DATE",
+          "sqlSelect": "CREATED",
+          "otherSearchField": "", 
+          "isAutocomplete": "0", 
+          "enumSearchType": "between", 
+          "value1": startTime, 
+          "value2": endTime
+      }];
+      queryParams = btoa(encodeURIComponent(JSON.stringify(data)));
+    }
     const post_data = {
         pageNum: page,
         pageSize: pageSize,
