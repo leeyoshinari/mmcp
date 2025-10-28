@@ -104,7 +104,7 @@ async function query_send_list(res) {
                     res.memberId = response.data[0].DISPATCH_ID;
                     res.company_res = 9999;
                     return res;
-                } else if (response.data[0].DISPATCHSTATUS === "解除") {
+                } else if (response.data[0].DISPATCHSTATUS === "解除" || response.data[0].DISPATCHSTATUS === "失效") {
                     exportText(`当前配送协议状态为 ${xieyi_status[status_index]}, 开始新建配送协议。配送会员: ${company}`);
                     res.company_res = -3;
                     return res;
@@ -196,15 +196,11 @@ async function query_code(code_name) {
         
         const response = await fetchPost(url, data, headers);
         if (response.succeed) {
-            if (response.data.datas.length > 0) {
-                response.data.datas.forEach(item => {
-                    if (item.NAME === res.company) {
-                        return item.ID;
-                    }
-                    throw new Error(`查询不到产品线，响应值：${response.data.datas}`);
-                })
+            const target_code = response.data.datas.find(m => m.NAME === code_name);
+            if (target_code) {
+                return target_code.ID;
             } else {
-                throw new Error(`查询不到产品线，请检查数据`);
+                throw new Error(`查询不到产品线，响应值：${response.data.datas}`);
             }
         } else {
             throw new Error(`查询产品线报错，错误: ${response}`);
@@ -220,7 +216,7 @@ async function submit_agreement(res) {
         const date_res = getEndDate();
         const url = `${host}/tps-local/ucenter/yjs-ucenter-start/dispatch/add.htm`;
         const data = {
-            "areas": JSON.stringify(res.areas),
+            "areas": res.areas,
             "beginTime": date_res.startDate,
             "endTime": date_res.endDate,
             "dispatchId": res.memberId,
@@ -232,8 +228,8 @@ async function submit_agreement(res) {
         const yyheader = headers;
         yyheader['content-type'] = 'application/json';
         
-        const response = await fetchPostText(url, data, yyheader);
-        if (response !== "true") {
+        const response = await fetchPost(url, data, yyheader);
+        if (!response.succeed) {
             throw new Error(`配送协议提交失败, 响应值: ${JSON.stringify(response)}`);
         }
     } catch (error) {
@@ -392,24 +388,24 @@ async function startTask212(dataList, header) {
                             exportText(`ERROR - 没有找到 ${area} . 配送会员: ${org_name}, 配送地区: ${area}`);
                             continue;
                         }
-                        let productStr = [];
+                        let productStrList = [];
                         for (const mcs_code of v2.v) {
                             try {
                                 let code_res_id = await query_code(mcs_code);
-                                productStr.push(code_res_id);
+                                productStrList.push(code_res_id);
                                 i3 += 1;
                                 s3 += 1;
-                                exportText(`添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}`);
+                                exportText(`添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 产品线ID: ${code_res_id}`);
                             } catch (error) {
                                 exportText(`ERROR - 查询产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 错误: ${error.stack}`);
                                 continue;
                             }
                         }
-                        if (productStr.length === 0) {
+                        if (productStrList.length === 0) {
                             exportText(`ERROR - 添加产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 错误: 没有一个有效的产品线`);
                             continue;
                         }
-                        send_code_res.push({platformGeoId: aera_id.platformGeoId, note: "", productStr: productStr.join(','), rate: "0"});
+                        send_code_res.push({platformGeoId: aera_id.platformGeoId, note: "", productStr: productStrList.join(','), rate: "0"});
                         exportText(`配送会员: ${org_name}, 配送地区: ${area}, 共添加 ${s3} 个产品线`);
                     }
                     if (send_code_res.length < 1) {
@@ -418,6 +414,7 @@ async function startTask212(dataList, header) {
                     }
                     res.areas = send_code_res;
                     await submit_agreement(res);
+                    success = success + s3;
                     exportText(`配送协议提交成功，配送会员: ${org_name}, 共配送 ${i2} 个地区, 共添加 ${i3} 个产品线`);
                 } else {    // 开始变更
                     let sended_result = await query_sended_agreement(res);  // 提取出已经提交过的 区域和产品线
@@ -449,7 +446,7 @@ async function startTask212(dataList, header) {
                                         has_sended_code_name.push(mcs_code);
                                         i3 += 1;
                                         s3 += 1;
-                                        exportText(`变更-添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}`);
+                                        exportText(`变更-添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 产品线ID: ${code_res_id}`);
                                     } else {
                                         exportText(`变更-已经添加过产品线了，跳过，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}`);
                                         has_send += 1;
@@ -474,7 +471,7 @@ async function startTask212(dataList, header) {
                                     productName.push(mcs_code);
                                     i3 += 1;
                                     s3 += 1;
-                                    exportText(`变更-添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}`);
+                                    exportText(`变更-添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 产品线ID: ${code_res_id}`);
                                 } catch (error) {
                                     exportText(`ERROR - 变更-查询产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 错误: ${error.stack}`);
                                 }
@@ -489,6 +486,7 @@ async function startTask212(dataList, header) {
                     }
                     res.areas = sended_result;
                     await submit_change(res);
+                    success = success + s3;
                     exportText(`变更-配送协议提交成功，配送会员: ${org_name}, 共配送 ${i2} 个地区, 共添加 ${i3} 个产品线`);
                 }
             } catch (error) {
