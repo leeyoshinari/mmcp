@@ -94,7 +94,8 @@ async function query_send_list(res) {
             currSchemeId: null
         }
         
-        const response = await fetchPost(url, post_data, headers);
+        headers['content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+        const response = await fetchPost(url, post_data, headers, maxRetries=3);
         if (response.listconfig) {
             if (response.data.length >= 1) {
                 const status_index = parseInt(response.data[0].DISPATCHSTATUSCODE);
@@ -143,7 +144,8 @@ async function new_build_agreement_query_company(company, res) {
             "quickFilterValue": JSON.stringify([{"fieldName": "NAME", "value1": company}])
         };
         
-        const response = await fetchPost(url, data, headers);
+        headers['content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+        const response = await fetchPost(url, data, headers, maxRetries=3);
         if (response.succeed) {
             if (response.data.datas.length === 1) {
                 res.memberId = response.data.datas[0].MEMBERID;
@@ -170,7 +172,8 @@ async function query_send_area(res) {
             "type": "APP"
         };
         
-        const response = await fetchPost(url, data, headers);
+        headers['content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+        const response = await fetchPost(url, data, headers, maxRetries=3);
         if (response.length > 0) {
             const result = [];
             response.forEach(item => {
@@ -191,14 +194,15 @@ async function query_code(code_name) {
         const url = `${host}/tps-local/ucenter/yjs-ucenter-start/controls/refer/agreement_productline_ref/load.htm?pageNum=1&pageSize=10&identifyID=null`;
         const data = {
             "sellerId": localStorage.getItem("memberId"),
-            "quickFilterValue": JSON.stringify([{"fieldName": "NAME_QUERY", "value1": code_name}])
+            "quickFilterValue": JSON.stringify([{"fieldName": "ID", "value1": code_name}])
         };
         
-        const response = await fetchPost(url, data, headers);
+        headers['content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+        const response = await fetchPost(url, data, headers, maxRetries=3);
         if (response.succeed) {
-            const target_code = response.data.datas.find(m => m.NAME === code_name);
+            const target_code = response.data.datas.find(m => m.ID === code_name);
             if (target_code) {
-                return target_code.ID;
+                return target_code.NAME;
             } else {
                 throw new Error(`查询不到产品线，响应值：${response.data.datas}`);
             }
@@ -228,7 +232,7 @@ async function submit_agreement(res) {
         const yyheader = headers;
         yyheader['content-type'] = 'application/json';
         
-        const response = await fetchPost(url, data, yyheader);
+        const response = await fetchPost(url, data, yyheader, maxRetries=3);
         if (!response.succeed) {
             throw new Error(`配送协议提交失败, 响应值: ${JSON.stringify(response)}`);
         }
@@ -284,6 +288,11 @@ async function query_sended_agreement(res) {
             };
             result.push(data);
         })
+        if (result.length === 0) {
+            throw new Error(`未获取已配送的区域和产品线`);
+        } else if (result[0].platformGeoId === "") {
+            throw new Error(`未获取已配送的区域和产品线, 数据为空`);
+        }
         return result;
     } catch (error) {
         throw error;
@@ -330,7 +339,7 @@ async function parse_excel(dataList) {
                 
                 const org_name = data[i][2] ? data[i][2].trim() : '';
                 const org_name_md5 = await calc_md5(org_name);
-                const mcs_code = data[i][14] ? String(data[i][14]).trim() : '';
+                const mcs_code = data[i][15] ? String(data[i][15]).trim() : '';
                 const area = data[i][4] ? data[i][4].trim() : '';
                 const area_md5 = await calc_md5(area);
                 if(!org_name && !orders && !area && !mcs_code) continue;
@@ -374,7 +383,7 @@ async function startTask212(dataList, header) {
                 let res = {company: org_name};
                 res = await query_send_list(res);   // 查询配送协议列表
                 if (res.company_res === -1) {
-                    exportText(`ERROR - 查询配送协议列表失败, 配送会员: ${org_name}`);
+                    continue;
                 } else if (res.company_res === -3) {    // 开始新建配送协议
                     res = await new_build_agreement_query_company(res.company, res);
                     let aera_result = await query_send_area(res);
@@ -391,13 +400,19 @@ async function startTask212(dataList, header) {
                         let productStrList = [];
                         for (const mcs_code of v2.v) {
                             try {
-                                let code_res_id = await query_code(mcs_code);
-                                productStrList.push(code_res_id);
-                                i3 += 1;
-                                s3 += 1;
-                                exportText(`添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 产品线ID: ${code_res_id}`);
+                                if (productStrList.indexOf(mcs_code) < 0) {
+                                    let code_res_name = await query_code(mcs_code);
+                                    productStrList.push(mcs_code);
+                                    i3 += 1;
+                                    s3 += 1;
+                                    exportText(`添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 产品线名称: ${code_res_name}`);
+                                } else {
+                                    exportText(`重复的产品线，已经添加过产品线了，跳过，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}`);
+                                    has_send += 1;
+                                    continue;
+                                }
                             } catch (error) {
-                                exportText(`ERROR - 查询产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 错误: ${error.stack}`);
+                                exportText(`ERROR - 添加产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 错误: ${error.stack}`);
                                 continue;
                             }
                         }
@@ -414,7 +429,7 @@ async function startTask212(dataList, header) {
                     }
                     res.areas = send_code_res;
                     await submit_agreement(res);
-                    success = success + s3;
+                    success = success + i3;
                     exportText(`配送协议提交成功，配送会员: ${org_name}, 共配送 ${i2} 个地区, 共添加 ${i3} 个产品线`);
                 } else {    // 开始变更
                     let sended_result = await query_sended_agreement(res);  // 提取出已经提交过的 区域和产品线
@@ -440,20 +455,20 @@ async function startTask212(dataList, header) {
                             let has_sended_code_name = sended_result[sended_index].productNameStr.split(',');
                             for (const mcs_code of v2.v) {
                                 try {
-                                    if (has_sended_code_name.indexOf(mcs_code) > -1) {
-                                        let code_res_id = await query_code(mcs_code);
-                                        has_sended_code.push(code_res_id);
-                                        has_sended_code_name.push(mcs_code);
+                                    if (has_sended_code.indexOf(mcs_code) < 0) {
+                                        let code_res_name = await query_code(mcs_code);
+                                        has_sended_code.push(mcs_code);
+                                        has_sended_code_name.push(code_res_name);
                                         i3 += 1;
                                         s3 += 1;
-                                        exportText(`变更-添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 产品线ID: ${code_res_id}`);
+                                        exportText(`变更-添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 产品线名称: ${code_res_name}`);
                                     } else {
-                                        exportText(`变更-已经添加过产品线了，跳过，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}`);
+                                        exportText(`变更-已经添加过产品线了，跳过，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}`);
                                         has_send += 1;
                                         continue;
                                     }
                                 } catch (error) {
-                                    exportText(`ERROR - 变更-查询产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 错误: ${error.stack}`);
+                                    exportText(`ERROR - 变更-查询产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 错误: ${error.stack}`);
                                     continue;
                                 }
                             }
@@ -466,14 +481,20 @@ async function startTask212(dataList, header) {
                             let productName = [];
                             for (const mcs_code of v2.v) {
                                 try {
-                                    let code_res_id = await query_code(mcs_code);
-                                    productStr.push(code_res_id);
-                                    productName.push(mcs_code);
-                                    i3 += 1;
-                                    s3 += 1;
-                                    exportText(`变更-添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 产品线ID: ${code_res_id}`);
+                                    if (productStr.indexOf(mcs_code) < 0) {
+                                        let code_res_name = await query_code(mcs_code);
+                                        productStr.push(mcs_code);
+                                        productName.push(code_res_name);
+                                        i3 += 1;
+                                        s3 += 1;
+                                        exportText(`变更-添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 产品线名称: ${code_res_name}`);
+                                    } else {
+                                        exportText(`变更-重复的产品线，已经添加过产品线了，跳过，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}`);
+                                        has_send += 1;
+                                        continue;
+                                    }
                                 } catch (error) {
-                                    exportText(`ERROR - 变更-查询产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线名称: ${mcs_code}, 错误: ${error.stack}`);
+                                    exportText(`ERROR - 变更-查询产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 错误: ${error.stack}`);
                                 }
                             }
                             if (productStr.length === 0) {
@@ -486,7 +507,7 @@ async function startTask212(dataList, header) {
                     }
                     res.areas = sended_result;
                     await submit_change(res);
-                    success = success + s3;
+                    success = success + i3;
                     exportText(`变更-配送协议提交成功，配送会员: ${org_name}, 共配送 ${i2} 个地区, 共添加 ${i3} 个产品线`);
                 }
             } catch (error) {

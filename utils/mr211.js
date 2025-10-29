@@ -4,30 +4,11 @@ const textContainer = document.getElementsByClassName("logs")[0];
 let headers = {};
 const excel_data = [['创建时间', '订单号', '产品编码', '产品名称', '订单状态', '订单数量', '单价', '总价', '价格单位', '产品规格', '产品类别', '买方名称', '配送会员', '代理商']];
 const pageSize = 10;
-
-let time_between_ele = null;
-try {
-    time_between_ele = document.getElementById("highseach").getElementsByClassName("betweenbox")[0];
-} catch (error) {
-    time_between_ele = document.getElementById("iframe").contentDocument.getElementById("highseach").getElementsByClassName("betweenbox")[0];
-}
-let values = [];
-let listconfigidEle = null;
-try {
-    listconfigidEle = document.getElementById("iframe").contentDocument.getElementById("replaceParams").getElementsByTagName("li");
-} catch (error) {
-    listconfigidEle = document.getElementById("replaceParams").getElementsByTagName("li");
-}
-Array.from(listconfigidEle).forEach(ele => {
-    values.push({fieldName: `#{${ele.getAttribute("key")}}`, value1: ele.getAttribute("value1")});
-});
-const replaceParams = btoa(encodeURIComponent(JSON.stringify(values)));
-const listconfigureEle = Array.from(listconfigidEle).find(m => m.getAttribute("key") === "listconfigid");
-const schemeIdEle = Array.from(listconfigidEle).find(m => m.getAttribute("key") === "schemeId");
-const listconfigidValue = listconfigureEle.getAttribute("value1");
-const currSchemeId = schemeIdEle.getAttribute("value1");
-const startTime = time_between_ele.getElementsByTagName("input")[0].value;
-const endTime = time_between_ele.getElementsByTagName("input")[1].value;
+let startTime = null;
+let endTime = null;
+let replaceParams = null;
+let listconfigidValue = null;
+let currSchemeId = null;
 
 async function query_list(page) {
   try {
@@ -48,6 +29,9 @@ async function query_list(page) {
           "value2": endTime
       }];
       queryParams = btoa(encodeURIComponent(JSON.stringify(data)));
+    }
+    if (!replaceParams && !listconfigidValue && !currSchemeId) {
+      throw new Error(`系统请求数据未null, 错误: ${error.stack}`);
     }
     const post_data = {
         pageNum: page,
@@ -72,6 +56,39 @@ async function startTask211(dataList, header) {
   headers = convertHeadersArrayToObject(header);
   headers['content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
   try {
+    try {
+      let time_between_ele = null;
+      try {
+          time_between_ele = document.getElementById("highseach").getElementsByClassName("betweenbox")[0];
+      } catch (error) {
+          time_between_ele = document.getElementById("iframe").contentDocument.getElementById("highseach").getElementsByClassName("betweenbox")[0];
+      }
+      startTime = time_between_ele.getElementsByTagName("input")[0].value;
+      endTime = time_between_ele.getElementsByTagName("input")[1].value;
+    } catch (error) {
+      exportText(`未获取到时间范围，将会导出所有数据，如需停止导出，请刷新页面。 错误: ${error.stack}`);
+    }
+
+    try {
+      let values = [];
+      let listconfigidEle = null;
+      try {
+          listconfigidEle = document.getElementById("iframe").contentDocument.getElementById("replaceParams").getElementsByTagName("li");
+      } catch (error) {
+          listconfigidEle = document.getElementById("replaceParams").getElementsByTagName("li");
+      }
+      Array.from(listconfigidEle).forEach(ele => {
+          values.push({fieldName: `#{${ele.getAttribute("key")}}`, value1: ele.getAttribute("value1")});
+      });
+      replaceParams = btoa(encodeURIComponent(JSON.stringify(values)));
+      const listconfigureEle = Array.from(listconfigidEle).find(m => m.getAttribute("key") === "listconfigid");
+      const schemeIdEle = Array.from(listconfigidEle).find(m => m.getAttribute("key") === "schemeId");
+      listconfigidValue = listconfigureEle.getAttribute("value1");
+      currSchemeId = schemeIdEle.getAttribute("value1");
+    } catch (error) {
+      throw new Error(`获取系统请求数据异常，错误: ${error.stack}`);
+    }
+
     let response = await query_list(1);
     const total_num = response.totalCount;
     const total_page = Math.ceil(total_num / pageSize);
@@ -102,10 +119,10 @@ async function startTask211(dataList, header) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    exportText("导出完成，请刷新页面后继续操作 (^_^)");
   } catch (error) {
     exportText(`失败, 请重试: ${error.stack}`);
   }
-  exportText("导出完成，请刷新页面后继续操作 (^_^)");
 }
 
 window.myExtensionFuncs = {

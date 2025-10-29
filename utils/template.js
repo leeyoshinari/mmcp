@@ -1,4 +1,4 @@
-async function fetchPost(url, data, myheader) {
+async function fetchPost(url, data, myheader, maxRetries=3) {
   const content_type = myheader['content-type'];
   let body = JSON.stringify(data);
   if (content_type.startsWith('application/x-www-form-urlencoded')) {
@@ -8,15 +8,30 @@ async function fetchPost(url, data, myheader) {
     });
     body = params.toString();
   }
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      ...myheader,
-    },
-    body: body,
-  });
-  if (!response.ok) throw new Error('Request Error:' + response.status);
-  return await response.json();
+  for (let attempt=1; attempt<=maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...myheader,
+        },
+        body: body,
+      });
+      if (!response.ok) throw new Error('Request Error:' + response.status);
+      return await response.json();
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          continue;
+        } else {
+          throw error;
+        }
+      } else {
+        throw error;
+      }
+    }
+  }
 }
 
 async function fetchPostText(url, data, myheader) {
@@ -40,15 +55,31 @@ async function fetchPostText(url, data, myheader) {
   return await response.text();
 }
 
-async function fetchGet(url, myheader) {
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...myheader,
-    },
-  });
-  if (!response.ok) throw new Error('Request Error:' + response.status);
-  return await response.json();
+async function fetchGet(url, myheader, maxRetries=3) {
+  for (let attempt=1; attempt<=maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          ...myheader,
+        },
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error('Request Error:' + response.status);
+      return await response.json();
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          continue;
+        } else {
+          throw error;
+        }
+      } else {
+        throw error;
+      }
+    }
+  }
 }
 
 async function fetchGetHtml(url, myheader) {
