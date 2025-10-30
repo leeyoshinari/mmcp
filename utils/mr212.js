@@ -374,6 +374,7 @@ async function startTask212(dataList, header) {
         const { res_dict: excel_data, total_num } = await parse_excel(dataList);
         let success = 0;
         let has_send = 0;
+        const error_msg = [["配送会员", "配送地区", "产品线ID", "状态", "原因"]];
         
         for (const [_, v1] of Object.entries(excel_data)) {
             const org_name = v1.k;
@@ -394,7 +395,8 @@ async function startTask212(dataList, header) {
                         const area = v2.k;
                         const aera_id = aera_result.find(m => m.countryName === area);
                         if (!aera_id) {
-                            exportText(`ERROR - 没有找到 ${area} . 配送会员: ${org_name}, 配送地区: ${area}`);
+                            exportText(`ERROR - 新建-没有找到 ${area} . 配送会员: ${org_name}, 配送地区: ${area}`);
+                            error_msg.push([org_name, area, " ", "失败", "新建-没有配送区域"]);
                             continue;
                         }
                         let productStrList = [];
@@ -405,32 +407,33 @@ async function startTask212(dataList, header) {
                                     productStrList.push(mcs_code);
                                     i3 += 1;
                                     s3 += 1;
-                                    exportText(`添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 产品线名称: ${code_res_name}`);
+                                    exportText(`新建-添加产品线成功，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 产品线名称: ${code_res_name}`);
                                 } else {
-                                    exportText(`重复的产品线，已经添加过产品线了，跳过，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}`);
+                                    exportText(`新建-重复的产品线，已经添加过产品线了，跳过，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}`);
                                     has_send += 1;
                                     continue;
                                 }
                             } catch (error) {
-                                exportText(`ERROR - 添加产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 错误: ${error.stack}`);
+                                exportText(`ERROR - 新建-添加产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 错误: ${error.stack}`);
+                                error_msg.push([org_name, area, mcs_code, "失败", "新建-添加产品线失败"]);
                                 continue;
                             }
                         }
                         if (productStrList.length === 0) {
-                            exportText(`ERROR - 添加产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 错误: 没有一个有效的产品线`);
+                            exportText(`ERROR - 新建-添加产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 错误: 没有一个有效的产品线`);
                             continue;
                         }
                         send_code_res.push({platformGeoId: aera_id.platformGeoId, note: "", productStr: productStrList.join(','), rate: "0"});
                         exportText(`配送会员: ${org_name}, 配送地区: ${area}, 共添加 ${s3} 个产品线`);
                     }
                     if (send_code_res.length < 1) {
-                        exportText(`ERROR - 添加产品线失败，配送会员: ${org_name}, 错误: 没有一个区域有有效的产品线`);
+                        exportText(`ERROR - 新建-添加产品线失败，配送会员: ${org_name}, 错误: 没有一个区域有有效的产品线`);
                         continue;
                     }
                     res.areas = send_code_res;
                     await submit_agreement(res);
                     success = success + i3;
-                    exportText(`配送协议提交成功，配送会员: ${org_name}, 共配送 ${i2} 个地区, 共添加 ${i3} 个产品线`);
+                    exportText(`新建-配送协议提交成功，配送会员: ${org_name}, 共配送 ${i2} 个地区, 共添加 ${i3} 个产品线`);
                 } else {    // 开始变更
                     let sended_result = await query_sended_agreement(res);  // 提取出已经提交过的 区域和产品线
                     const sended_result_total = sended_result.length;
@@ -441,7 +444,8 @@ async function startTask212(dataList, header) {
                         const area = v2.k;
                         const aera_id = aera_result.find(m => m.countryName === area);
                         if (!aera_id) {
-                            exportText(`ERROR - 没有找到 ${area} . 配送会员: ${org_name}, 配送地区: ${area}`);
+                            exportText(`ERROR - 变更-没有找到 ${area} . 配送会员: ${org_name}, 配送地区: ${area}`);
+                            error_msg.push([org_name, area, " ", "失败", "变更-没有配送区域"]);
                             continue;
                         }
                         let sended_index = -1;      // 当前配送区域是否已配送过，找到下标索引值
@@ -468,7 +472,8 @@ async function startTask212(dataList, header) {
                                         continue;
                                     }
                                 } catch (error) {
-                                    exportText(`ERROR - 变更-查询产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 错误: ${error.stack}`);
+                                    exportText(`ERROR - 变更-添加产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 错误: ${error.stack}`);
+                                    error_msg.push([org_name, area, mcs_code, "失败", "变更-添加产品线失败"]);
                                     continue;
                                 }
                             }
@@ -494,7 +499,9 @@ async function startTask212(dataList, header) {
                                         continue;
                                     }
                                 } catch (error) {
-                                    exportText(`ERROR - 变更-查询产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 错误: ${error.stack}`);
+                                    exportText(`ERROR - 变更-添加产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 产品线ID: ${mcs_code}, 错误: ${error.stack}`);
+                                    error_msg.push([org_name, area, mcs_code, "失败", "变更-添加产品线失败"]);
+                                    continue;
                                 }
                             }
                             if (productStr.length === 0) {
@@ -512,9 +519,20 @@ async function startTask212(dataList, header) {
                 }
             } catch (error) {
                 exportText(`ERROR - 配送失败，配送会员: ${org_name}, 错误: ${error.stack}`);
+                error_msg.push([org_name, " ", " ", "失败", "提交失败"]);
             }
         }
         exportText(`总数: ${total_num}, 配送成功: ${success}, 配送失败: ${total_num - success - has_send}, 已经配送过 ${has_send}`);
+        let csv_data = "";
+        error_msg.forEach(function(rowArray) {csv_data += rowArray.join(",") + "\r\n";});
+        let blob = new Blob(["\uFEFF" + csv_data], {type: 'text/csv;charset=utf-8;'});
+        let link = document.createElement('a');
+        link.style.display = 'none';
+        link.href = URL.createObjectURL(blob);
+        link.download = '配送失败记录.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     } catch (error) {
         exportText(`失败, 请重试: ${error.stack}`);
     }

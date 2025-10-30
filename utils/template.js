@@ -16,6 +16,7 @@ async function fetchPost(url, data, myheader, maxRetries=3) {
           ...myheader,
         },
         body: body,
+        credentials: "include"
       });
       if (!response.ok) throw new Error('Request Error:' + response.status);
       return await response.json();
@@ -88,6 +89,7 @@ async function fetchGetHtml(url, myheader) {
     headers: {
       ...myheader,
     },
+    credentials: "include"
   });
   if (!response.ok) throw new Error('Request Error:' + response.status);
   return await response.text();

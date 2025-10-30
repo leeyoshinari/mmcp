@@ -2,13 +2,14 @@
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
 let headers = {};
-const excel_data = [['创建时间', '订单号', '产品编码', '产品名称', '订单状态', '订单数量', '单价', '总价', '价格单位', '产品规格', '产品类别', '买方名称', '配送会员', '代理商']];
+const excel_data = [['创建时间', '订单号', '产品编码', '产品名称', '订单状态', '产品状态', '订单数量', "响应数量", "发货数量", '已收数量', '单价', '总价', '价格单位', '产品规格', '产品类别', '买方名称', '配送会员', '代理商']];
 const pageSize = 10;
 let startTime = null;
 let endTime = null;
 let replaceParams = null;
 let listconfigidValue = null;
 let currSchemeId = null;
+let orderStatus = [];
 
 async function query_list(page) {
   try {
@@ -17,8 +18,9 @@ async function query_list(page) {
       url = `${host}/tps-local/ucenter/yjs-ecps-start/listOrder/page.htm`;
     }
     let queryParams = "JTVCJTVE";
+    const data = [];
     if (startTime && endTime) {
-      const data = [{"description": "创建时间",
+      data.push({"description": "创建时间",
           "fieldName": "CREATED",
           "fieldTypeId": "DATE",
           "sqlSelect": "CREATED",
@@ -27,11 +29,24 @@ async function query_list(page) {
           "enumSearchType": "between", 
           "value1": startTime, 
           "value2": endTime
-      }];
+      });
+    }
+    if (orderStatus.length > 0) {
+      data.push({"description": "订单状态",
+        "fieldName": "ORDER_STATE_CODE",
+        "fieldTypeId": "ENUM",
+        "sqlSelect": "ORDER_STATE_CODE",
+        "otherSearchField": "",
+        "isAutocomplete": "0",
+        "enumSearchType": "OR",
+        "value1": orderStatus.join(",")
+      });
+    }
+    if (data.length > 0) {
       queryParams = btoa(encodeURIComponent(JSON.stringify(data)));
     }
     if (!replaceParams && !listconfigidValue && !currSchemeId) {
-      throw new Error(`系统请求数据未null, 错误: ${error.stack}`);
+      throw new Error(`系统请求数据为null, 错误: ${error.stack}`);
     }
     const post_data = {
         pageNum: page,
@@ -59,14 +74,22 @@ async function startTask211(dataList, header) {
     try {
       let time_between_ele = null;
       try {
-          time_between_ele = document.getElementById("highseach").getElementsByClassName("betweenbox")[0];
+          time_between_ele = document.getElementsByClassName("search_box")[0].getElementsByClassName("betweenbox")[0];
       } catch (error) {
-          time_between_ele = document.getElementById("iframe").contentDocument.getElementById("highseach").getElementsByClassName("betweenbox")[0];
+          time_between_ele = document.getElementById("iframe").contentDocument.getElementsByClassName("search_box")[0].getElementsByClassName("betweenbox")[0];
       }
       startTime = time_between_ele.getElementsByTagName("input")[0].value;
       endTime = time_between_ele.getElementsByTagName("input")[1].value;
+      
+      let order_status_ele = null;
+      try {
+        order_status_ele = document.getElementById("checkbox_ORDER_STATE_CODE").getElementsByClassName("checkbox-btn checkbox-selected");
+      } catch (error) {
+        order_status_ele = document.getElementById("iframe").contentDocument.getElementById("checkbox_ORDER_STATE_CODE").getElementsByClassName("checkbox-btn checkbox-selected");
+      }
+      Array.from(order_status_ele).forEach(ele => {orderStatus.push(ele.parentNode.getAttribute("data-value"))});
     } catch (error) {
-      exportText(`未获取到时间范围，将会导出所有数据，如需停止导出，请刷新页面。 错误: ${error.stack}`);
+      exportText(`未获取到筛选条件，将会导出所有数据，如需停止导出，请刷新页面。 错误: ${error.stack}`);
     }
 
     try {
@@ -94,14 +117,14 @@ async function startTask211(dataList, header) {
     const total_page = Math.ceil(total_num / pageSize);
     exportText(`总共 ${total_page} 页，共计 ${total_num} 条数据`);
     response.data.forEach(r => {
-      let row = [`"${r.CREATEDS}"`, `"${r.ORDER_NO}"`, `"${r.PRODUCT_CODE}"`, `"${r.PRODUCT_NAME}"`, r.ORDER_STATE_NAME, r.ORDER_NUMBER, r.MATCH_PRICE, r.SUM_PRICE, r.PRICE_UNIT, `"${r.SPECIFICATIONS}"`, r.PRODUCT_TYPE_NAME, r.BUYER_NAME, r.DISPATCHER_NAME, r.PRODUCTER];
+      let row = [`"${r.CREATEDS}"`, `"${r.ORDER_NO}"`, `"${r.PRODUCT_CODE}"`, `"${r.PRODUCT_NAME}"`, r.ORDER_STATE_NAME, r.DETAIL_STATE_NAME, r.ORDER_NUMBER, r.RESPONSE_NUMBER, r.OUT_ALL_NUMBER, r.CONFIRM_ALL_NUMBER, r.MATCH_PRICE, r.SUM_PRICE, r.PRICE_UNIT, `"${r.SPECIFICATIONS}"`, r.PRODUCT_TYPE_NAME, r.BUYER_NAME, r.DISPATCHER_NAME, r.PRODUCTER];
       excel_data.push(row);
     })
     exportText(`正在导出第 1 页数据`);
     for (let i=2; i<total_page + 1; i++) {
       response = await query_list(i);
       response.data.forEach(r => {
-        let row = [`"${r.CREATEDS}"`, `"${r.ORDER_NO}"`, `${r.PRODUCT_CODE}"`, `"${r.PRODUCT_NAME}"`, r.ORDER_STATE_NAME, r.ORDER_NUMBER, r.MATCH_PRICE, r.SUM_PRICE, r.PRICE_UNIT, `"${r.SPECIFICATIONS}"`, r.PRODUCT_TYPE_NAME, r.BUYER_NAME, r.DISPATCHER_NAME, r.PRODUCTER];
+        let row = [`"${r.CREATEDS}"`, `"${r.ORDER_NO}"`, `${r.PRODUCT_CODE}"`, `"${r.PRODUCT_NAME}"`, r.ORDER_STATE_NAME, r.DETAIL_STATE_NAME, r.ORDER_NUMBER, r.RESPONSE_NUMBER, r.OUT_ALL_NUMBER, r.CONFIRM_ALL_NUMBER, r.MATCH_PRICE, r.SUM_PRICE, r.PRICE_UNIT, `"${r.SPECIFICATIONS}"`, r.PRODUCT_TYPE_NAME, r.BUYER_NAME, r.DISPATCHER_NAME, r.PRODUCTER];
         excel_data.push(row);
       })
       exportText(`正在导出第 ${i} 页数据`);
