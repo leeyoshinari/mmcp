@@ -117,14 +117,14 @@ async function startTask211(dataList, header) {
     const total_page = Math.ceil(total_num / pageSize);
     exportText(`总共 ${total_page} 页，共计 ${total_num} 条数据`);
     response.data.forEach(r => {
-      let row = [`"${r.CREATEDS}"`, `"${r.ORDER_NO}"`, `"${r.PRODUCT_CODE}"`, `"${r.PRODUCT_NAME}"`, r.ORDER_STATE_NAME, r.DETAIL_STATE_NAME, r.ORDER_NUMBER, r.RESPONSE_NUMBER, r.OUT_ALL_NUMBER, r.CONFIRM_ALL_NUMBER, r.MATCH_PRICE, r.SUM_PRICE, r.PRICE_UNIT, `"${r.SPECIFICATIONS}"`, r.PRODUCT_TYPE_NAME, r.BUYER_NAME, r.DISPATCHER_NAME, r.PRODUCTER];
+      let row = [r.CREATEDS, r.ORDER_NO, r.PRODUCT_CODE, `"${r.PRODUCT_NAME}"`, r.ORDER_STATE_NAME, r.DETAIL_STATE_NAME, r.ORDER_NUMBER, r.RESPONSE_NUMBER, r.OUT_ALL_NUMBER, r.CONFIRM_ALL_NUMBER, r.MATCH_PRICE, r.SUM_PRICE, r.PRICE_UNIT, `"${r.SPECIFICATIONS}"`, r.PRODUCT_TYPE_NAME, r.BUYER_NAME, r.DISPATCHER_NAME, r.PRODUCTER];
       excel_data.push(row);
     })
     exportText(`正在导出第 1 页数据`);
     for (let i=2; i<total_page + 1; i++) {
       response = await query_list(i);
       response.data.forEach(r => {
-        let row = [`"${r.CREATEDS}"`, `"${r.ORDER_NO}"`, `${r.PRODUCT_CODE}"`, `"${r.PRODUCT_NAME}"`, r.ORDER_STATE_NAME, r.DETAIL_STATE_NAME, r.ORDER_NUMBER, r.RESPONSE_NUMBER, r.OUT_ALL_NUMBER, r.CONFIRM_ALL_NUMBER, r.MATCH_PRICE, r.SUM_PRICE, r.PRICE_UNIT, `"${r.SPECIFICATIONS}"`, r.PRODUCT_TYPE_NAME, r.BUYER_NAME, r.DISPATCHER_NAME, r.PRODUCTER];
+        let row = [r.CREATEDS, r.ORDER_NO, r.PRODUCT_CODE, `"${r.PRODUCT_NAME}"`, r.ORDER_STATE_NAME, r.DETAIL_STATE_NAME, r.ORDER_NUMBER, r.RESPONSE_NUMBER, r.OUT_ALL_NUMBER, r.CONFIRM_ALL_NUMBER, r.MATCH_PRICE, r.SUM_PRICE, r.PRICE_UNIT, `"${r.SPECIFICATIONS}"`, r.PRODUCT_TYPE_NAME, r.BUYER_NAME, r.DISPATCHER_NAME, r.PRODUCTER];
         excel_data.push(row);
       })
       exportText(`正在导出第 ${i} 页数据`);

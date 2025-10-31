@@ -384,6 +384,7 @@ async function startTask212(dataList, header) {
                 let res = {company: org_name};
                 res = await query_send_list(res);   // 查询配送协议列表
                 if (res.company_res === -1) {
+                    error_msg.push([org_name, " ", " ", "失败", "查询配送协议列表报错，或者协议状态不支持变更"]);
                     continue;
                 } else if (res.company_res === -3) {    // 开始新建配送协议
                     res = await new_build_agreement_query_company(res.company, res);
