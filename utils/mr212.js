@@ -509,7 +509,7 @@ async function startTask212(dataList, header) {
                                 exportText(`ERROR - 变更-添加产品线失败，配送会员: ${org_name}, 配送地区: ${area}, 错误: 没有一个有效的产品线`);
                                 continue;
                             }
-                            sended_result.push({platformGeoId: aera_id.platformGeoId, dispatchAreaId: "", note: "", productStr: productStr.join(','), productNameStr: productName.join(','), rate: "0", productLineSum: aera_id.productLineSum, productLineCount: len(productStr)});
+                            sended_result.push({platformGeoId: aera_id.platformGeoId, dispatchAreaId: "", note: "", productStr: productStr.join(','), productNameStr: productName.join(','), rate: "0", productLineSum: aera_id.productLineSum, productLineCount: productStr.length});
                         }
                         exportText(`变更-配送会员: ${org_name}, 配送地区: ${area}, 共添加 ${s3} 个产品线`);
                     }
