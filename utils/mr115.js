@@ -57,7 +57,7 @@ async function query_send_list(ms_code, company, city, purchase_type) {
             if (res_json['data']['records'].length === 1) {
                 if (res_json['data']['records'][0]['prodAsocStatus'] === '99') {
                     exportText(`当前配送关系状态为 已作废, 正在重新提交。产品ID: ${ms_code}, 配送企业: ${company}, 配送区域: ${city}, 采购来源: ${purchase_type}`);
-                    return -1;
+                    return res_json['data']['records'][0]['schmProdId'];
                 } else {
                     const prodAsocStatus = Math.min(parseInt(res_json['data']['records'][0]['prodAsocStatus']), 3);
                     const statusText = ['生产未提交', '生产已提交', '已生效', '配送已拒绝'][prodAsocStatus];
