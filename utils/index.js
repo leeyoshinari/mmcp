@@ -1,5 +1,6 @@
 const actionList = [
   {'label': '点配送', 'js': '500', 'url': 'ybj.hubei.gov.cn', 'province': '湖北', 'auth': 'https://ybj.hubei.gov.cn/tps-local/web/auth/user/query_user_info', "header": {"service-mall-accesstoken": "authorization", "service-mall-refreshtoken": "refreshtoken", "accounttype": 2}, "used": 0},
+  {'label': '导出列表', 'js': '211', 'url': 'ybj.hubei.gov.cn', 'province': '湖北', 'auth': 'https://ybj.hubei.gov.cn/tps-local/web/auth/user/query_user_info', "header": {"service-mall-accesstoken": "authorization", "service-mall-refreshtoken": "refreshtoken", "accounttype": 2}, "used": 1},
 ]
 const allData = [];
 const currentHost = window.location.host;
