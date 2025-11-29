@@ -94,8 +94,8 @@ window.addEventListener('load', () => {
             fetch(user_url, { method: method, headers: h })
                 .then(response => response.text())
                 .then(text => {
-                    console.log(text);
-                    if (text.indexOf('迈瑞') > 1 || text.indexOf('长岛生物') > 1) {
+                    // console.log(text);
+                    if (text.indexOf('迈瑞') > 1 || text.indexOf('长岛') > 1) {
                         document.body.appendChild(myDiv);
                     }
                 })
