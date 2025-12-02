@@ -49,11 +49,14 @@ async function query_company(res) {
         
         const response = await fetchPost(url, data, headers);
         if (response.code === 0 && response.data) {
-            if (response.data.records.length === 1) {
-                res.uscc = response.data.records[0].uscc;
-                return res;
-            } else if (response.data.records.length > 1) {
-                throw new Error(`查询到多个配送企业, 挂网ID: ${res.extCode}, 配送企业: ${res.orgName}, 查询结果: ${JSON.stringify(response.data.records)}`);
+            if (response.data.records.length > 0) {
+                for (let b=0; b<response.data.records.length; b++) {
+                    if (response.data.records[b].orgName === res.orgName) {
+                        res.uscc = response.data.records[b].uscc;
+                        return res;
+                    }
+                }
+                throw new Error(`找不到配送企业, 挂网ID: ${res.extCode}, 配送企业: ${res.orgName}, 查询结果: ${JSON.stringify(response.data.records)}`);
             } else {
                 throw new Error(`查询不到配送企业, 挂网ID: ${res.extCode}, 配送企业: ${res.orgName}, 查询结果: ${JSON.stringify(response)}`);
             }
@@ -316,6 +319,7 @@ async function startTask212(dataList, header) {
     } catch (error) {
         exportText(`失败, 请重试: ${error.stack}`);
     }
+    downloadData(textContainer.textContent);
     exportText("已结束, 请刷新页面后继续操作 (^_^)");
 }
 
