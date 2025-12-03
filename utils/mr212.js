@@ -186,16 +186,19 @@ async function query_hospital(res) {
         
         const response = await fetchPost(url, data, headers);
         if (response.code === 0 && response.data) {
-            if (response.data.records.length === 1) {
-                res.cityCode = response.data.records[0].cityCode;
-                res.cityName = response.data.records[0].cityName;
-                res.cotyCode = response.data.records[0].cotyCode;
-                res.cotyName = response.data.records[0].cotyName;
-                res.medinsCode = response.data.records[0].medinsCode;
-                res.medinsName = response.data.records[0].medinsName;
-                return res;
-            } else if (response.data.records.length > 1) {
-                throw new Error(`查询到多个医院, 挂网ID: ${res.extCode}, 地市: ${res.admdvsName}, 医院: ${res.medinsName}, 查询结果: ${JSON.stringify(response.data.records)}`);
+            if (response.data.records.length > 0) {
+                for (let b=0; b<response.data.records.length; b++) {
+                    if (response.data.records[b].medinsName === res.medinsName) {
+                        res.cityCode = response.data.records[b].cityCode;
+                        res.cityName = response.data.records[b].cityName;
+                        res.cotyCode = response.data.records[b].cotyCode;
+                        res.cotyName = response.data.records[b].cotyName;
+                        res.medinsCode = response.data.records[b].medinsCode;
+                        res.medinsName = response.data.records[b].medinsName;
+                        return res;
+                    }
+                }
+                throw new Error(`找不到医院, 挂网ID: ${res.extCode}, 地市: ${res.admdvsName}, 医院: ${res.medinsName}, 查询结果: ${JSON.stringify(response.data.records)}`);
             } else {
                 throw new Error(`查询不到医院, 挂网ID: ${res.extCode}, 地市: ${res.admdvsName}, 医院: ${res.medinsName}, 查询结果: ${JSON.stringify(response)}`);
             }
