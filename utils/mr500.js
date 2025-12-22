@@ -60,19 +60,28 @@ async function query_company(res, type = 0) {
         
         const response = await fetchPost(url, data, headers);
         
-        if (response.data.total === 1) {
-            if (type === 1) {
-                res.submitStatus = response.data.records[0].schmCnfmStas;
-                res.delvSchmId = response.data.records[0].delvSchmId;
-                res.delvEntpCode = response.data.records[0].delvEntpCode;
+        if (response.data.total > 0) {
+            for (let ii=0; ii<response.data.total; ii++) {
+                if (response.data.records[ii].admdvsName === res.admdvsName) {
+                    if (type === 1) {
+                        res.submitStatus = response.data.records[0].schmCnfmStas;
+                        res.delvSchmId = response.data.records[0].delvSchmId;
+                        res.delvEntpCode = response.data.records[0].delvEntpCode;
+                        return res;
+                    } else {
+                        res.drtDelvFlag = response.data.records[0].drtDelvFlag;
+                        res.delvEntpCode = response.data.records[0].delvEntpCode;
+                        return res;
+                    }
+                }
+            }
+            if (type === 0) {
+                exportText(`可选配送企业列表中查询不到企业，即将去已选配送企业中查找，配送企业：${res.delvEntpName}，所属项目：${res.tenditmName}，配送地区：${res.admdvsName}`);
                 return res;
             } else {
-                res.drtDelvFlag = response.data.records[0].drtDelvFlag;
-                res.delvEntpCode = response.data.records[0].delvEntpCode;
-                return res;
+                throw new Error(`${type === 0 ? '可选' : '已选'}配送企业列表中查询不到企业，配送企业：${res.delvEntpName}，所属项目：${res.tenditmName}，配送地区：${res.admdvsName}，查询结果：${JSON.stringify(response)}`);
             }
-        } else if (response.data.total > 1) {
-            throw new Error(`${type === 0 ? '可选' : '已选'}配送企业列表中查询到多个企业，配送企业：${res.delvEntpName}，查询结果：${JSON.stringify(response)}`);
+            
         } else {
             if (type === 0) {
                 exportText(`可选配送企业列表中找不到企业，即将去已选配送企业中查找，配送企业：${res.delvEntpName}，所属项目：${res.tenditmName}，配送地区：${res.admdvsName}`);
