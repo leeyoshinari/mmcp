@@ -34,7 +34,7 @@ function clickPage() {
       reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
+          const workbook = XLSX.read(data, { type: 'array', cellDates: true });
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
           const range = XLSX.utils.decode_range(worksheet['!ref']);
@@ -87,7 +87,7 @@ async function fetchExcel() {
     for (let nn = 0; nn < excelFileList.length; nn ++) {
       const excelDataList = [];
       const excelData = await fileClient.receiveFile(excelFileList[nn], requestType = 'requestExcel').catch((err) => {throw err;});
-      const workbook = XLSX.read(excelData, { type: 'array' });
+      const workbook = XLSX.read(excelData, { type: 'array', cellDates: true });
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
       const range = XLSX.utils.decode_range(worksheet['!ref']);

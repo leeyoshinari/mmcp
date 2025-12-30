@@ -218,11 +218,15 @@ async function submit_agreement(res) {
     // 新建添加协议
     try {
         const date_res = getEndDate();
+        let endTime = date_res.endDate;
+        if (res.endTime.length > 9) {
+            endTime = res.endTime
+        }
         const url = `${host}/tps-local/ucenter/yjs-ucenter-start/dispatch/add.htm`;
         const data = {
             "areas": res.areas,
             "beginTime": date_res.startDate,
-            "endTime": date_res.endDate,
+            "endTime": endTime,
             "dispatchId": res.memberId,
             "items": "委托存储",
             "shippingMethod": 3,
@@ -303,11 +307,15 @@ async function submit_change(res) {
     // 协议变更配送协议
     try {
         const date_res = getEndDate();
+        let endTime = date_res.endDate;
+        if (res.endTime.length > 9) {
+            endTime = res.endTime
+        }
         const url = `${host}/tps-local/ucenter/yjs-ucenter-start/dispatch/changeUpdate.htm`;
         const data = {
             "areas": res.areas,
             "dispatchAgreementId": res.agreementId,
-            "endTime": date_res.endDate,
+            "endTime": endTime,
             "submitType": "saveSubmit",
             "type": "APP"
         };
@@ -326,6 +334,7 @@ async function submit_change(res) {
 async function parse_excel(dataList) {
     try {
         const res_dict = {};
+        const time_dict = {};
         let total_num = 0;
         for (let j = 0; j < dataList.length; j++) {
             let i = 0;
@@ -335,12 +344,13 @@ async function parse_excel(dataList) {
             }
             i += 1;
             for (i; i < data.length; i++) {
-                if (!data[i][3]) continue;
+                if (!data[i][2]) continue;
                 
-                const org_name = data[i][2] ? data[i][2].trim() : '';
+                const org_name = data[i][2] ? String(data[i][2]).trim() : '';
                 const org_name_md5 = await calc_md5(org_name);
-                const mcs_code = data[i][15] ? String(data[i][15]).trim() : '';
-                const area = data[i][4] ? data[i][4].trim() : '';
+                const endTime = String(data[i][9]);
+                const mcs_code = data[i][16] ? String(data[i][16]).trim() : '';
+                const area = data[i][4] ? String(data[i][4]).trim() : '';
                 const area_md5 = await calc_md5(area);
                 if(!org_name && !orders && !area && !mcs_code) continue;
                 
@@ -356,11 +366,12 @@ async function parse_excel(dataList) {
                         k: org_name, 
                         v: {[area_md5]: {k: area, v: [mcs_code]}}
                     };
+                    time_dict[org_name_md5] = endTime.split("T")[0];
                 }
             }
         }   
         exportText(`总共有 ${total_num} 条待配送的数据`);
-        return { res_dict, total_num };
+        return { res_dict, time_dict, total_num };
     } catch (error) {
         exportText(`Error in parse_excel: ${error.stack}`);
         throw error;
@@ -371,17 +382,18 @@ async function startTask212(dataList, header) {
     headers = convertHeadersArrayToObject(header);
     headers['content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
     try {
-        const { res_dict: excel_data, total_num } = await parse_excel(dataList);
+        const { res_dict: excel_data, time_dict: time_data, total_num } = await parse_excel(dataList);
         let success = 0;
         let has_send = 0;
         const error_msg = [["配送会员", "配送地区", "产品线ID", "状态", "原因"]];
         
-        for (const [_, v1] of Object.entries(excel_data)) {
+        for (const [k1, v1] of Object.entries(excel_data)) {
             const org_name = v1.k;
+            const org_end_time = time_data[k1]
             try {
                 let i2 = 0;
                 let i3 = 0;
-                let res = {company: org_name};
+                let res = {company: org_name, endTime: org_end_time};
                 res = await query_send_list(res);   // 查询配送协议列表
                 if (res.company_res === -1) {
                     error_msg.push([org_name, " ", " ", "失败", "查询配送协议列表报错，或者协议状态不支持变更"]);
