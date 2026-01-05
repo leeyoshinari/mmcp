@@ -11,7 +11,7 @@ function getEndDate() {
     
     let endMonth, endDay;
     if (currentMonth <= 6) {
-        endMonth = currentMonth + 6;
+        endMonth = currentMonth + 5;
     } else {
         endMonth = 12;
     }
