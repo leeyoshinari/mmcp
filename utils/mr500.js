@@ -62,15 +62,15 @@ async function query_company(res, type = 0) {
         
         if (response.data.total > 0) {
             for (let ii=0; ii<response.data.total; ii++) {
-                if (response.data.records[ii].admdvsName === res.admdvsName) {
+                if (response.data.records[ii].delvEntpName === res.delvEntpName && response.data.records[ii].admdvsName === res.admdvsName) {
                     if (type === 1) {
-                        res.submitStatus = response.data.records[0].schmCnfmStas;
-                        res.delvSchmId = response.data.records[0].delvSchmId;
-                        res.delvEntpCode = response.data.records[0].delvEntpCode;
+                        res.submitStatus = response.data.records[ii].schmCnfmStas;
+                        res.delvSchmId = response.data.records[ii].delvSchmId;
+                        res.delvEntpCode = response.data.records[ii].delvEntpCode;
                         return res;
                     } else {
-                        res.drtDelvFlag = response.data.records[0].drtDelvFlag;
-                        res.delvEntpCode = response.data.records[0].delvEntpCode;
+                        res.drtDelvFlag = response.data.records[ii].drtDelvFlag;
+                        res.delvEntpCode = response.data.records[ii].delvEntpCode;
                         return res;
                     }
                 }
@@ -112,13 +112,16 @@ async function query_company_bak(res) {
         
         const response = await fetchPost(url, data, headers);
         
-        if (response.data.total === 1) {
-            res.cntrId = response.data.records[0].cntrId;
-            res.cntrCode = response.data.records[0].cntrCode;
-            res.prodEntpName = response.data.records[0].prodEntpName;
-            res.cntrChangeStas = response.data.records[0].cntrChangeStas;
-            return res;
-        } else if (response.data.total > 1) {
+        if (response.data.total > 0) {
+            for (let ii=0; ii<response.data.total; ii++) {
+                if (response.data.records[ii].delvEntpName === res.delvEntpName) {
+                    res.cntrId = response.data.records[ii].cntrId;
+                    res.cntrCode = response.data.records[ii].cntrCode;
+                    res.prodEntpName = response.data.records[ii].prodEntpName;
+                    res.cntrChangeStas = response.data.records[ii].cntrChangeStas;
+                    return res;
+                }
+            }
             throw new Error(`配送签约调整列表中查询到多个企业，配送企业：${res.delvEntpName}，查询结果：${JSON.stringify(response)}`);
         } else {
             throw new Error(`配送签约调整列表中找不到企业，配送企业：${res.delvEntpName}`);
