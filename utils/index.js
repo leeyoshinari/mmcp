@@ -1,5 +1,5 @@
 const actionList = [
-  {'label': '点配送', 'js': '500', 'url': '60.31.22.187:9000', 'province': '湖北', 'auth': 'http://60.31.22.187:9000/tps-local/web/auth/user/query_user_info?tenditmType=2', "header": null, "used": 0},
+  {'label': '点配送', 'js': '500', 'url': '60.31.22.187:9000', 'province': '内蒙古', 'auth': 'http://60.31.22.187:9000/tps-local/web/auth/user/query_user_info?tenditmType=2', "header": null, "used": 0},
 ]
 const allData = [];
 const currentHost = window.location.host;
