@@ -92,7 +92,7 @@ async function startTask213(dataList, header) {
             let res = {};
             res = await query_code(ms_code, hospital, res);
             await agree_bargain(is_agree, res);
-            success += 1;
+            success_num += 1;
             exportText(`议价成功, 药交ID: ${ms_code}, 医疗机构: ${hospital}, 议价执行: ${is_agree}`);
           } catch (err) {
             exportText(`议价失败, 药交ID: ${ms_code}, 医疗机构: ${hospital}, 议价执行: ${is_agree}, 错误: ${err.stack}`);
