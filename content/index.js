@@ -18,7 +18,7 @@ window.addEventListener('load', () => {
     const tipsImg = document.createElement("img");
     tipsImg.src = chrome.runtime.getURL("images/icon.ico");
     myDiv.className = "float-tips";
-    myDiv.style.top = window.innerHeight - 200 + 'px';
+    myDiv.style.top = window.innerHeight - 100 + 'px';
     myDiv.addEventListener('click', () => {
         clickPage();
         document.getElementById('startTask').addEventListener('click', () => {
@@ -91,7 +91,7 @@ window.addEventListener('load', () => {
                     }
                 }
             }
-            fetch(user_url, { method: method, headers: h })
+            fetch(user_url+Date.now(), { method: method, headers: h })
                 .then(response => response.text())
                 .then(text => {
                     console.log(text);
@@ -101,7 +101,6 @@ window.addEventListener('load', () => {
                 })
                 .catch(error => console.log(error));
         }
-        // document.body.appendChild(myDiv);
     }
-    setTimeout(() => {check_user()}, 3000);
+    setTimeout(() => {check_user()}, 5000);
 });
