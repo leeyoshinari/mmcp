@@ -581,6 +581,7 @@ async function startTask500(dataList, header) {
         exportText(`失败，请重试: ${error.stack}`);
     }
     exportText("已结束，请刷新页面后继续操作 (^_^)");
+    downloadData(textContainer.textContent);
 }
 
 window.myExtensionFuncs = {
