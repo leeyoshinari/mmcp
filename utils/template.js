@@ -75,7 +75,7 @@ function downloadData(data) {
     let link = document.createElement('a');
     link.style.display = 'none';
     link.href = URL.createObjectURL(blob);
-    link.download = 'run.log';
+    link.download = 'run.txt';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
