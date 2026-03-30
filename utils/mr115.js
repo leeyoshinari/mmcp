@@ -166,6 +166,19 @@ async function save_city(res) {
     }
 }
 
+async function submit_first(res) {
+    try {
+        const url = `${host}/HSNN/CM/Trade/Web/Controller/DistributionController/SubmitRelationToComPS.HSNN?proid=${res.PROCURECATALOGID}&comid=${res.COMID}`;
+        const data = {};
+        const res_json = await fetchPost(url, data, headers);
+        if (res_json['result'] !== 'ok') {
+            throw new Error(`提交配送失败, 产品编号: ${res.code}, 配送企业: ${res.company}, 配送区域: ${res.region}, 查询结果: ${JSON.stringify(res_json)}`);
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function submit_c(res) {
     try {
         const url = `${host}/HSNN/CM/Trade/Web/Controller/DistributionController/SubmitValidityDateToComPS.HSNN?proid=${res.PROCURECATALOGID}&comid=${res.COMID}`;
@@ -215,6 +228,10 @@ async function startTask115(dataList, header) {
                             res = await query_company(res, 2);
                             if (!res.addcompany) {
                                 await modify_time(res);
+                                res = await query_areas(res);
+                                await save_city(res);
+                                await submit_first(res);
+                                continue;
                             }
                         }
                         
