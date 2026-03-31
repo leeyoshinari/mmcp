@@ -231,6 +231,8 @@ async function startTask115(dataList, header) {
                                 res = await query_areas(res);
                                 await save_city(res);
                                 await submit_first(res);
+                                success += 1;
+                                exportText(`配送成功, 产品编号: ${res.code}, 配送企业: ${res.company}, 配送区域: ${res.region}`);
                                 continue;
                             }
                         }
