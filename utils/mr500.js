@@ -62,7 +62,7 @@ async function query_company(res, type = 0) {
         
         if (response.data.total > 0) {
             for (let ii=0; ii<response.data.total; ii++) {
-                if (response.data.records[ii].delvEntpName === res.delvEntpName && response.data.records[ii].admdvsName === res.admdvsName) {
+                if (response.data.records[ii].delvEntpName.trim() === res.delvEntpName && response.data.records[ii].admdvsName === res.admdvsName) {
                     if (type === 1) {
                         res.submitStatus = response.data.records[ii].schmCnfmStas;
                         res.delvSchmId = response.data.records[ii].delvSchmId;
@@ -114,7 +114,7 @@ async function query_company_bak(res) {
         
         if (response.data.total > 0) {
             for (let ii=0; ii<response.data.total; ii++) {
-                if (response.data.records[ii].delvEntpName === res.delvEntpName) {
+                if (response.data.records[ii].delvEntpName.triom() === res.delvEntpName) {
                     res.cntrId = response.data.records[ii].cntrId;
                     res.cntrCode = response.data.records[ii].cntrCode;
                     res.prodEntpName = response.data.records[ii].prodEntpName;
