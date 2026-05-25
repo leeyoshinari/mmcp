@@ -12,7 +12,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://60.31.22.187:*/*"],
+      "matches": ["https://www.nmgybggfw.org.cn:*/*"],
       "css": ["content/index.css"],
       "js": ["content/index.js", "utils/index.js", "utils/xlsx.full.min.js", "content/websocket.js"]
     }
