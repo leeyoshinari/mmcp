@@ -36,7 +36,7 @@ window.addEventListener('load', () => {
                         hh.src = chrome.runtime.getURL(`utils/${'mr' + selectVal}.js`);
                         document.body.appendChild(hh);
                     }
-                    console.log(allData);
+                    // console.log(allData);
                 }
                 document.getElementById('startTask').disabled = true;
             });
