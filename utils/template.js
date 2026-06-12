@@ -30,6 +30,30 @@ async function fetchGet(url, myheader) {
   return await response.json();
 }
 
+async function fetchPut(url, data, myheader) {
+  const content_type = myheader['content-type'] || myheader['Content-Type'];
+  let body = JSON.stringify(data);
+  
+  if (content_type && content_type.startsWith('application/x-www-form-urlencoded')) {
+    const params = new URLSearchParams();
+    Object.entries(data).forEach(([key, value]) => {
+      params.append(key, value === null ? "" : value === undefined ? "" : value);
+    });
+    body = params.toString();
+  }
+  
+  const response = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      ...myheader,
+    },
+    body: body,
+  });
+  
+  if (!response.ok) throw new Error('Request Error:' + response.status);
+  return await response.json();
+}
+
 function createWebSocket(url, protocols) {
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(url, protocols);

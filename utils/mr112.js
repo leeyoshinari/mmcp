@@ -1,110 +1,145 @@
-// 广州市平台议价
+// 海南点配送
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
 let headers = {};
 
 async function queryCode(msCode, res) {
-    try {
-        const url = `${host}/gpo/tps-local-bd/web/mcsTrade/suppurBargain/getQYSuppurBargainData`;
-        const data = {"current": 1, "size": 10, "searchCount": true, "searchTime": [], "bargainId": String(msCode)};
-        const response = await fetchPost(url, data, headers);
-        
-        if (response.code === 0 && response.data && response.data.records.length === 1) {
-            return {
-                ...res,
-                bargainId: msCode,
-                bargainApply: response.data.records[0].bargainApply
-            };
-        } else {
-            throw new Error(`议价列表查询结果为空或有多个，查询结果：${JSON.stringify(response.data)}`);
-        }
-    } catch (error) {
-        exportText(`议价列表查询失败，议价号：${msCode}，错误：${error.stack}`);
-        throw error;
+    const url = `${host}/tps-local/local/web/trns/trnsProdRgt/getTrnsProdDrugByDelvRltlSetPage?current=1&size=10&prodCode=${msCode}`;
+    const response = await fetchGet(url, headers);
+    if (response.code === 0 && response.data && response.data.records.length === 1) {
+        return {
+            ...res,
+            prodId: response.data.records[0].prodId,
+            dclaEntpName: response.data.records[0].dclaEntpName,
+            dclaEntpCode: response.data.records[0].dclaEntpCode,
+            prodentpName: response.data.records[0].prodentpName,
+            prodentpCode: response.data.records[0].prodentpCode,
+            pubonlnStas: response.data.records[0].pubonlnStas
+        };
+    } else {
+        throw new Error(`配送关系设置列表查询结果为空或有多个试剂统一编码，试剂统一编码: ${msCode}，查询结果：${JSON.stringify(response.data)}`);
     }
 }
 
-async function agreeBargain(res) {
-    try {
-        const url = `${host}/gpo/tps-local-bd/web/mcsTrade/suppurBargain/compSubSuppurBargain`;
-        const response = await fetchPost(url, res, headers);
-        
-        if (!response.success || response.code !== 0) {
-            exportText(`议价失败，响应值：${JSON.stringify(response)}`);
-            throw new Error(response.msg);
+async function querySendRelation(msCode, res, save_flag) {
+    const url = `${host}/tps-local/local/web/trns/trnsRgtDelvRltl/getTrnsDelvRltlList?current=1&size=10&prodCode=${msCode}&delventpName=${encodeURIComponent(res['delventpName'])}&delvRltlStas=0&admdvs=${res['admdvs']}`;
+    const response = await fetchGet(url, headers);
+    if (response.code === 0 && response.data && response.data.records.length === 1) {
+        return response.data.records[0].drugDelvRltlId;
+    } else {
+        if (save_flag) {
+            return '-11';
+        } else {
+            throw new Error(`配送关系列表查询结果为空或有多条数据，试剂统一编码: ${msCode}，配送企业: ${res['delventpName']}，配送地区: ${res['admdvsName']}，查询结果：${JSON.stringify(response.data)}`);
         }
-    } catch (error) {
-        exportText(`议价失败，错误：${error.stack}`);
-        throw error;
+    }
+}
+
+async function query_company(company, res) {
+    const url = `${host}/tps-local/local/web/bdc/bidprcuRgtOrgInfo/getPsCompanyPage?current=1&size=10&orgName=${encodeURIComponent(company)}&orgBizTypeCode=2`;
+    const res_json = await fetchGet(url, headers);
+    if (res_json['code'] === 0 && res_json['data'] && res_json['data']['records'].length > 0) {
+        for (const rr of res_json['data']['records']) {
+            const new_org_name = rr['orgName'].trim();
+            if (new_org_name === company) {
+                res["delventpCode"] = rr['uscc'];
+                return res;
+            }
+        }
+        throw new Error(`配送企业查询到多个, 配送企业: ${company}, 查询结果: ${JSON.stringify(res_json['data']['records'])}`);
+    } else {
+        throw new Error(`配送企业查询为空, 配送企业: ${company}, 响应值: ${JSON.stringify(res_json['data'])}`);
+    }
+}
+
+async function query_area(area, res) {
+    const url = `${host}/tps-local/local/web/bdc/admdvsInfo/list?prntAdmdvs=460000`;
+    const res_json = await fetchGet(url, headers);
+    if (res_json['code'] === 0 && res_json['data']) {
+        for (const rr of res_json['data']) {
+            const new_area_name = rr['admdvsName'].trim();
+            if (new_area_name === area) {
+                res["admdvs"] = rr['admdvs'];
+                return res;
+            }
+        }
+        throw new Error(`配送区域查询到多个, 配送区域: ${area}, 查询结果: ${JSON.stringify(res_json['data'])}`);
+    } else {
+        throw new Error(`配送区域查询为空, 配送区域: ${area}, 响应值: ${JSON.stringify(res_json['data'])}`);
+    }
+}
+
+async function save_data(res) {
+    const url = `${host}/tps-local/local/web/trns/trnsRgtDelvRltl/batchSaveTrnsDelvRltl`;
+    const response = await fetchPost(url, [res], headers);
+    return response;
+}
+
+async function submit(drugDelvRltlId) {
+    const url = `${host}/tps-local/local/web/trns/trnsRgtDelvRltl/batchSubmitByIds`;
+    let postData = {"drugDelvRltlIds": [String(drugDelvRltlId)]};
+    const response = await fetchPut(url, postData, headers);
+    if (!response.data || response.code !== 0) {
+        throw new Error(`提交失败，响应值：${JSON.stringify(response)}`);
     }
 }
 
 async function startTask112(dataList, header) {
   let total_num = 0;
   let success_num = 0;
+  let has_send = 0;
   headers = convertHeadersArrayToObject(header);
-  headers['content-type'] = 'application/json;charset=UTF-8';
+  headers['content-type'] = 'application/json';
   try {
     for (let j = 0; j < dataList.length; j++) {
       let i = 0;
       const data = dataList[j];
       for (i; i < data.length; i++) {
-        if (data[i][1] === '广州市平台-议价号') break;
+        if (data[i][0] === '点配国码' && data[i][1] === '配送商' && data[i][2] === '点配市县') break;
       }
       i += 1;
       for (i; i < data.length; i++) {
         if (!data[i][1]) continue;
         total_num += 1;
-        let ms_code = data[i][1];
-        let is_agree = data[i][2];
-        try {
-          ms_code = ms_code.trim();
-        } catch (err) {
-          ms_code = String(parseInt(ms_code)).trim();
-        }
-        try {
-          is_agree = is_agree.trim();
-        } catch (err) {
-          is_agree = String(is_agree).trim();
-        }
-        if (ms_code && is_agree) {
+        let ms_code = data[i][0].trim();
+        let company = data[i][1].trim();
+        let area = data[i][2].trim();
+        if (ms_code && company && area) {
           try {
-            await timer(1000);
-            let res = {};
-            if (is_agree === '同意') {
-              res = await queryCode(ms_code, res);
-              res = {
-                ...res,
-                bargainStatus: 1,
-                companyBargain: 0
-              };
-            } else {
-              try {
-                const newPrice = parseFloat(is_agree);
-                res = {
-                  bargainId: String(ms_code),
-                  bargainStatus: 2,
-                  companyBargain: parseFloat(is_agree).toString()
-                };
-              } catch (error) {
-                exportText(`该操作暂不支持，议价号：${ms_code}，议价执行：${is_agree}`);
-                continue;
-              }
+            let res = {'delventpName': company,'admdvsName': area};
+            res = await queryCode(ms_code, res);
+            res = await query_company(company, res);
+            res = await query_area(area, res);
+            let save_res = await save_data(res);
+            let save_flag = false;
+            if (save_res.code !== 0 || !save_res.type === 'error') {
+                if (save_res.message.indexOf('已过滤') > 0) {
+                  save_flag = true;
+                } else {
+                  throw new Error(`保存失败，响应值：${JSON.stringify(save_res)}`);
+                }
             }
-            await agreeBargain(res);
+            let drugDelvRltlId = await querySendRelation(ms_code, res, save_flag);
+            if (drugDelvRltlId === '-11') {
+                has_send += 1;
+                exportText(`已经配送过了，试剂统一编码: ${ms_code}，配送企业: ${res['delventpName']}，配送地区: ${res['admdvsName']}`);
+                continue;
+            }
+            await submit(drugDelvRltlId);
             success_num += 1;
-            exportText(`议价成功，议价号：${ms_code}，议价执行：${is_agree}`);
+            exportText(`配送成功，试剂统一编码: ${ms_code}，配送企业: ${res['delventpName']}，配送地区: ${res['admdvsName']}`);
           } catch (err) {
-            exportText(`议价失败，议价号：${ms_code}，议价执行：${is_agree}。Error: ${err.stack}`);
+            exportText(`配送失败，试剂统一编码: ${ms_code}，配送企业: ${company}，配送地区: ${area}。${err.stack}`);
           }
         }
       }
     }
-    exportText(`总数：${total_num}，议价成功：${success_num}，议价失败：${total_num - success_num}`);
+    exportText(`总数：${total_num}，配送成功：${success_num}，已经配送过：${has_send}，配送失败：${total_num - has_send - success_num}`);
   } catch (err) {
     exportText(`失败，请重试: ${err.stack}`);
   }
   exportText("已结束，请刷新页面后继续操作 (^_^)");
+  downloadData(textContainer.textContent);
 }
 
 window.myExtensionFuncs = {
