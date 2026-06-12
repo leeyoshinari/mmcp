@@ -1,6 +1,5 @@
 const actionList = [
   {'label': '点配送', 'js': '112', 'url': 'ybj.hainan.gov.cn', 'province': '海南', 'auth': 'https://ybj.hainan.gov.cn/tps-local/upms/web/core/login/getInfo', "header": null, "used": 0},
-  {'label': '撤废', 'js': '115', 'url': 'ybj.hainan.gov.cn', 'province': '海南', 'auth': 'https://ybj.hainan.gov.cn/tps-local/upms/web/core/login/getInfo', "header": null, "used": 0},
 ]
 const allData = [];
 const currentHost = window.location.host;

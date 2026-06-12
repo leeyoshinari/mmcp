@@ -94,12 +94,12 @@ function exportText(text) {
   console.log(text);
 }
 
-function downloadData(data) {
+function downloadData(data, name) {
     let blob = new Blob(["\uFEFF" + data], {type: 'text/csv;charset=utf-8;'});
     let link = document.createElement('a');
     link.style.display = 'none';
     link.href = URL.createObjectURL(blob);
-    link.download = 'run.log';
+    link.download = name;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
