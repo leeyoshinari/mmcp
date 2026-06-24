@@ -1,5 +1,5 @@
 const actionList = [
-  {'label': '点配送', 'js': '115', 'url': 'ylbzj.hebei.gov.cn/tps-local', 'province': '广州市', 'auth': 'https://ylbzj.hebei.gov.cn/tps-local/web/auth/user/query_user_info?timestamp=', "header": null, "used": 0},
+  {'label': '点配送', 'js': '115', 'url': 'ylbzj.hebei.gov.cn/tps-local', 'province': '河北省', 'auth': 'https://ylbzj.hebei.gov.cn/tps-local/web/auth/user/query_user_info?timestamp=', "header": null, "used": 0},
 ]
 const allData = [];
 const currentHost = window.location.host;

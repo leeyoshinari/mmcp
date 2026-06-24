@@ -1,4 +1,4 @@
-// 广州市平台点配送
+// 河北省点配送
 const host = window.location.origin;
 const textContainer = document.getElementsByClassName("logs")[0];
 let resubmit_num = 0;
