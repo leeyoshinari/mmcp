@@ -173,7 +173,7 @@ async function queryOrg(orgName, res) {
 // 查询区域
 async function queryAreas(area, res) {
   const url =`${host}/tps-local/web/trans/puragreement/query_admdvs`;
-  const data = { tenditmType: "2" };
+  const data = { "tenditmType": "2" };
   const result = await fetchPost(url, data, headers);
   const citys = result.data.citys;
   const area_list = [];
@@ -188,7 +188,6 @@ async function queryAreas(area, res) {
           for (const d of c.citys) {
             if (d.admdvsName === b) {
               area_list.push(d);
-              break;
             }
           }
         }
