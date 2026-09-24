@@ -27,8 +27,10 @@ function dealExcel(dataList) {
 
         if (shi && org_name && auth_time && auth_file && zu_code && project_name) {
             if (datas[org_name]) {
-                if (datas[org_name].area[shi] && !datas[org_name].area[shi].includes(xian)) {
+                if (datas[org_name].area[shi]) { 
+                  if (!datas[org_name].area[shi].includes(xian)) {
                     datas[org_name].area[shi].push(xian);
+                  }
                 } else {
                     datas[org_name].area[shi] = [xian];
                 }
@@ -210,6 +212,19 @@ async function submit(res) {
   }
 }
 
+
+// 排序
+function sortObject(obj) {
+    if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
+        return obj;
+    }
+    return Object.keys(obj).sort().reduce((result, key) => {
+        result[key] = sortObject(obj[key]);
+        return result;
+    }, {});
+}
+
+
 async function startTask211(dataList, header) {
   headers = convertHeadersArrayToObject(header);
   headers['content-type'] = 'application/json;charset=UTF-8';
@@ -239,7 +254,10 @@ async function startTask211(dataList, header) {
             try {
               const project_name_id = await queryProjectName(p);
               const prod = await queryZu(c, project_name_id);
-              pubonlnProdList.push(prod);
+              let isExist = pubonlnProdList.some(item => JSON.stringify(sortObject(item)) === JSON.stringify(sortObject(prod)));
+              if (!isExist) {
+                pubonlnProdList.push(prod);
+              }
               exportText(`产品编号添加成功，配送企业：${k}，产品编码：${c}，项目名称：${p}`);
             } catch (e) {
               exportText(`产品编号添加失败，配送企业：${k}，产品编码：${c}，项目名称：${p}, ${e.stack}`);
@@ -247,6 +265,10 @@ async function startTask211(dataList, header) {
             await timer(1000);
           }
 
+          pubonlnProdList.forEach((item, prod_index) => {
+            item.index = prod_index;
+            item.serialNumber = 1;
+          });
           res.pubonlnProdList = pubonlnProdList;
           await submit(res);
           exportText(`提交成功，配送企业：${k}，共配送 ${res['delvAreaList'].length} 个地区，共配送成功 ${res['pubonlnProdList'].length} 个产品编号，失败 ${v['code'].length - res['pubonlnProdList'].length} 个产品编号`);
