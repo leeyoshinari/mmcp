@@ -156,16 +156,16 @@ async function startTask115(dataList, header) {
             let i = 0;
             const data = dataList[j];
             for (i; i < data.length; i++) {
-                if (data[i][7] && String(data[i][7]).trim().indexOf('注册证编号') > 0) break;
+                if (data[i][4] && String(data[i][4]).trim().indexOf('注册证编号') > 0) break;
             }
             i += 1;
             for (i; i < data.length; i++) {
-                if (!data[i][7]) continue;
+                if (!data[i][4]) continue;
                 total_num += 1;
-                let ms_code = data[i][7].trim();
-                let company = data[i][3].trim();
-                let city = data[i][5].trim();
-                let tenditmName = data[i][9].trim();
+                let ms_code = data[i][4].trim();
+                let company = data[i][0].trim();
+                let city = data[i][2].trim();
+                let tenditmName = data[i][6].trim();
                 if (ms_code && company && city && tenditmName) {
                     try {
                         let res = {"mcsRegno": ms_code, "admdvsName": city, "delvEntpName": company, "tenditmName": tenditmName, "tenditmType": "2"};
